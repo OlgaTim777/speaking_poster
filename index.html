@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON ECHO // Synthwave Vocab Editor PRO v11 (Backdrop & Buttons)</title>
+    <style>
+        :root {
+            --bg-dark: #0d0d15;
+            --bg-card: rgba(20, 20, 35, 0.75);
+            --bg-glass: rgba(30, 30, 55, 0.6);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff007f;
+            --neon-purple: #9d00ff;
+            --neon-yellow: #ffe600;
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            
+            --custom-neon-color: #00f3ff;
+            --custom-stroke-style: solid;
+            --custom-glow-intensity: 15px;
+            --custom-border-width: 3px;
+            --custom-hotspot-size: 60px;
+            --custom-hotspot-bg: rgba(0, 243, 255, 0.1);
+            
+            --ref-color: #9d00ff;
+            --ref-scale: 1;
+
+            /* Масштаб постера из ползунка */
+            --poster-scale: 1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 15% 50%, rgba(157, 0, 255, 0.12) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15) 0%, transparent 50%); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* --- HEADER --- */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(13, 13, 21, 0.9); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(10px); z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+        .nav-tabs { display: flex; gap: 10px; }
+        .tab-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; letter-spacing: 1px; transition: var(--transition-smooth); display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .tab-btn.active { background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(255, 0, 127, 0.2)); border-color: var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); color: #fff; }
+
+        /* --- MAIN LAYOUT --- */
+        main { flex: 1; display: flex; position: relative; height: calc(100vh - 70px); }
+        .view-section { display: none; width: 100%; height: 100%; }
+        .view-section.active { display: flex; }
+
+        /* --- SIDEBAR & TABS --- */
+        .editor-sidebar { width: 450px; background: var(--bg-card); border-right: 1px solid var(--border-color); backdrop-filter: blur(15px); display: flex; flex-direction: column; overflow: hidden; z-index: 10; }
+        .sidebar-tabs-nav { display: flex; flex-wrap: wrap; background: rgba(0,0,0,0.6); border-bottom: 1px solid var(--border-color); }
+        .s-tab-btn { flex: 1 1 30%; background: transparent; border: none; color: var(--text-muted); padding: 12px 5px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; border-bottom: 2px solid transparent; }
+        .s-tab-btn:hover { color: var(--neon-cyan); background: rgba(255,255,255,0.05); }
+        .s-tab-btn.active { color: #fff; border-bottom-color: var(--neon-pink); background: rgba(255, 0, 127, 0.1); }
+        .sidebar-content-area { flex: 1; overflow-y: auto; padding: 20px; }
+        .sidebar-tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .sidebar-tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FORM ELEMENTS --- */
+        .sidebar-section { margin-bottom: 25px; }
+        .sidebar-section h3 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px dashed rgba(0,243,255,0.3); padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 10px; }
+        .form-row > div { flex: 1; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; color: var(--text-main); cursor: pointer; font-size: 0.9rem; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; background: rgba(10, 10, 18, 0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; color: var(--text-main); font-family: inherit; font-size: 0.9rem; transition: var(--transition-smooth); }
+        input[type="color"] { width: 100%; height: 40px; border: 1px solid var(--border-color); border-radius: 6px; background: rgba(10, 10, 18, 0.8); cursor: pointer; padding: 2px; }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--neon-cyan); cursor: pointer; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0, 243, 255, 0.3); }
+        textarea { resize: vertical; min-height: 80px; }
+        .btn { background: linear-gradient(135deg, var(--neon-cyan), #0088ff); color: #000; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: var(--transition-smooth); display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(0, 243, 255, 0.6); }
+        .btn-secondary { background: transparent; border: 1px solid var(--neon-pink); color: var(--text-main); }
+        .btn-secondary:hover { background: rgba(255, 0, 127, 0.15); box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); color: #fff; }
+        .btn-purple { background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); color: #fff; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--neon-cyan); cursor: pointer; box-shadow: 0 0 10px var(--neon-cyan); }
+        .switch-container { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 15px; }
+
+        /* --- ВЕРНУЛАСЬ ЭТАЛОННАЯ СИСТЕМА СЛОЕВ ИЗ ВЕРСИИ 7 --- */
+        .workspace { flex: 1; background-color: #08080c; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; padding: 0; }
+        #preview-section .workspace { background-color: transparent; }
+        
+        .canvas-container { 
+            position: relative; width: 100%; height: 100%; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: padding 0.3s, background 0.3s; 
+            background-size: cover; background-position: center; 
+        }
+        
+        .canvas-container-inner { 
+            position: relative; display: inline-block; 
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            user-select: none; 
+            transition: padding 0.3s;
+        }
+
+        .poster-backdrop {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0; pointer-events: none;
+            transition: all 0.3s;
+        }
+        
+        .canvas-container-inner img { 
+            display: block; 
+            position: relative; z-index: 1; /* Поверх подложки */
+            max-width: calc(100% * var(--poster-scale, 1)); 
+            max-height: calc((100vh - 140px) * var(--poster-scale, 1)); 
+            object-fit: contain; pointer-events: none; 
+        }
+
+        .empty-state { text-align: center; color: var(--text-muted); border: 2px dashed var(--border-color); padding: 50px; border-radius: 12px; background: var(--bg-glass); z-index: 500;}
+
+        /* --- SLIDE NAVIGATION --- */
+        .slide-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.5); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; border-radius: 50%; user-select: none; transition: var(--transition-smooth); border: 2px solid rgba(255,255,255,0.2); }
+        .slide-nav:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); border-color: var(--neon-cyan); transform: translateY(-50%) scale(1.1); }
+        .prev-slide { left: 20px; }
+        .next-slide { right: 20px; }
+        .active-slide-btn { background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(255, 0, 127, 0.2)) !important; border-color: var(--neon-pink) !important; color: #fff !important; }
+
+        /* --- HOTSPOTS --- */
+        .hotspot { position: absolute; width: var(--custom-hotspot-size); height: var(--custom-hotspot-size); transform: translate(-50%, -50%); cursor: pointer; border: var(--custom-border-width) var(--custom-stroke-style) var(--custom-neon-color); border-radius: 12px; background: var(--custom-hotspot-bg); box-shadow: 0 0 var(--custom-glow-intensity) var(--custom-neon-color), inset 0 0 calc(var(--custom-glow-intensity) / 2) var(--custom-neon-color); display: flex; align-items: center; justify-content: center; transition: box-shadow 0.2s ease, background-color 0.2s ease; z-index: 5; }
+        .editor-mode-active .hotspot { cursor: move; }
+        .hotspot:hover { background: rgba(0, 243, 255, 0.25); box-shadow: 0 0 calc(var(--custom-glow-intensity) * 1.8) var(--custom-neon-color), inset 0 0 var(--custom-glow-intensity) var(--custom-neon-color); z-index: 10; }
+        .hotspot-badge { background: var(--neon-pink); color: #fff; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; position: absolute; top: -10px; left: -10px; box-shadow: 0 0 8px var(--neon-pink); pointer-events: none; }
+        .hotspot-delete { position: absolute; top: -10px; right: -10px; background: #ff003c; color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: bold; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 5px #ff003c; }
+        .editor-mode-active .hotspot:hover .hotspot-delete { display: flex; }
+        .hotspot-label { position: absolute; bottom: -30px; background: rgba(13, 13, 21, 0.95); border: 1px solid var(--custom-neon-color); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; box-shadow: 0 0 5px var(--custom-neon-color); }
+        .hotspot:hover .hotspot-label { opacity: 1; }
+
+        /* --- BUTTONS & LOGO OVERLAY --- */
+        .mode-btn { position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s; z-index: 15; user-select: none; box-sizing: border-box; transform: translate(-50%, -50%); }
+        .mode-btn.active-mode { box-shadow: 0 0 15px rgba(255,255,255,0.4) !important; filter: brightness(1.2); transform: translate(-50%, -50%) scale(1.05); }
+        .editor-mode-active .mode-btn.draggable { cursor: move; outline: 2px dashed rgba(255,255,255,0.5); outline-offset: 2px; }
+        .dragging { opacity: 0.7; box-shadow: 0 10px 20px rgba(0,0,0,0.5) !important; }
+
+        .custom-logo-overlay { position: absolute; z-index: 25; transform: translate(-50%, -50%); transition: transform 0.2s, filter 0.2s; user-select: none; display: flex; align-items: center; justify-content: center; }
+        .custom-logo-overlay a { text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .custom-logo-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; pointer-events: none; }
+        .custom-logo-overlay span { white-space: nowrap; font-weight: 800; letter-spacing: 1px; }
+        .editor-mode-active .custom-logo-overlay { cursor: move; outline: 2px dashed rgba(255, 0, 127, 0.6); outline-offset: 4px; }
+        .custom-logo-overlay:hover { filter: drop-shadow(0 0 10px var(--neon-cyan)); transform: translate(-50%, -50%) scale(1.05); }
+
+        /* --- REFLECTION PANEL & REWARDS --- */
+        .reflection-panel { position: absolute; background: rgba(13, 13, 21, 0.85); border: 2px solid var(--ref-color); backdrop-filter: blur(10px); padding: 10px 15px; border-radius: 30px; display: flex; gap: 12px; align-items: center; z-index: 20; box-shadow: 0 0 20px var(--ref-color); transform: translate(-50%, -50%) scale(var(--ref-scale)); transform-origin: center; transition: border-color 0.3s, box-shadow 0.3s; }
+        .editor-mode-active .reflection-panel { cursor: move; outline: 2px dashed rgba(255,255,255,0.4); outline-offset: 4px; }
+        .emoji-item { font-size: 1.6rem; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s ease; filter: grayscale(40%) opacity(0.7); user-select: none; display: inline-block; }
+        .reward-img { object-fit: contain; vertical-align: middle; }
+        .emoji-item:hover { transform: scale(1.3); filter: grayscale(0%) opacity(1); }
+        .emoji-item.selected { transform: scale(1.4); filter: grayscale(0%) opacity(1); text-shadow: 0 0 15px var(--neon-yellow); filter: drop-shadow(0 0 10px var(--neon-yellow)); }
+        .reflection-panel.has-selection .emoji-item:not(.selected) { filter: grayscale(100%) opacity(0.3); transform: scale(0.9); }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #12121f; border: 1px solid var(--neon-cyan); border-radius: 12px; width: 90%; max-width: 650px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0, 243, 255, 0.3); overflow: hidden; }
+        .modal-header { padding: 15px 20px; background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { font-size: 1.2rem; color: var(--neon-cyan); }
+        .close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .code-block { background: #08080c; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; color: #00f3ff; word-break: break-all; max-height: 200px; overflow-y: auto; margin: 10px 0; user-select: all; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        .instructions-box { background: rgba(255, 0, 127, 0.1); border-left: 4px solid var(--neon-pink); padding: 12px; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4; }
+
+        #toast { position: fixed; bottom: 20px; right: 20px; background: var(--neon-cyan); color: #000; padding: 12px 24px; border-radius: 6px; font-weight: 700; box-shadow: 0 0 15px rgba(0, 243, 255, 0.6); transform: translateY(100px); opacity: 0; transition: var(--transition-smooth); z-index: 2000; }
+        #toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">NEON ECHO // SYNTHWAVE PRO</div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchMainTab('editor')"><span>🛠️ Editor Mode</span></button>
+            <button class="tab-btn" onclick="switchMainTab('preview')"><span>🚀 Preview / Trainer</span></button>
+            <button class="tab-btn btn-purple" onclick="openModal('export-modal')"><span>📦 Export & Genially</span></button>
+        </div>
+    </header>
+
+    <main>
+        <!-- ================= EDITOR MODE ================= -->
+        <section id="editor-section" class="view-section active editor-mode-active">
+            
+            <div class="editor-sidebar">
+                <div class="sidebar-tabs-nav">
+                    <button class="s-tab-btn active" onclick="switchSidebarTab('tab-content')">📁 Контент</button>
+                    <button class="s-tab-btn" onclick="switchSidebarTab('tab-buttons')">🎛️ Кнопки</button>
+                    <button class="s-tab-btn" onclick="switchSidebarTab('tab-markers')">📍 Маркеры</button>
+                    <button class="s-tab-btn" onclick="switchSidebarTab('tab-visual')">✨ Визуал/Награды</button>
+                    <button class="s-tab-btn" onclick="switchSidebarTab('tab-logo')">🏷️ Логотип</button>
+                    <button class="s-tab-btn" onclick="switchSidebarTab('tab-project')">💾 Проект</button>
+                </div>
+
+                <div class="sidebar-content-area">
+                    
+                    <div id="tab-content" class="sidebar-tab-content active">
+                        
+                        <div class="sidebar-section" style="background: rgba(0,243,255,0.05); padding: 10px; border-radius: 8px; border: 1px dashed var(--neon-cyan);">
+                            <h3 style="margin-bottom: 10px;">📑 Слайды (до 10)</h3>
+                            <div id="slides-list" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;"></div>
+                            <button class="btn btn-secondary" onclick="addSlide()" style="font-size: 0.8rem; padding: 6px;">➕ Добавить слайд</button>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>📁 Загрузка контента</h3>
+                            <div class="form-group">
+                                <div class="file-upload-wrapper">
+                                    <button class="btn btn-secondary">🖼️ Загрузить постер (Изображение)</button>
+                                    <input type="file" id="poster-upload" accept="image/*" onchange="handleImageUpload(event, 'poster')">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Список слов (каждое с новой строки):</label>
+                                <textarea id="words-input" placeholder="apple&#10;banana&#10;cyberpunk" oninput="updateWordsList()"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Предложения-примеры (строго по порядку слов):</label>
+                                <textarea id="sentences-input" placeholder="This is a red apple.&#10;Monkeys love banana.&#10;Welcome to the cyberpunk future." oninput="updateSentencesList()"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>📏 Размер постера</h3>
+                            <div class="form-group">
+                                <label>Размер картинки-постера: <span id="poster-size-val">100</span>%</label>
+                                <input type="range" id="poster-size" min="10" max="100" value="100" oninput="updatePosterSize()">
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Уменьшите ползунок, чтобы оставить больше места (например, для кнопок).</p>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>🖼️ Глобальный фон (за пределами постера)</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="bg-enabled" onchange="updateBackgroundSettings()">
+                                    Показать фоновое поле экрана
+                                </label>
+                            </div>
+                            <div id="bg-settings-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+                                <div class="form-group">
+                                    <label>Сплошной цвет фона:</label>
+                                    <input type="color" id="bg-color" value="#0d0d15" onchange="updateBackgroundSettings()">
+                                </div>
+                                <div class="form-group">
+                                    <div class="file-upload-wrapper">
+                                        <button class="btn btn-secondary" style="font-size: 0.85rem;">🌄 Загрузить фоновое изображение</button>
+                                        <input type="file" accept="image/*" onchange="handleImageUpload(event, 'background')">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Отступ экрана (padding): <span id="bg-padding-val">20</span>px</label>
+                                    <input type="range" id="bg-padding" min="0" max="100" value="20" oninput="updateBackgroundSettings()">
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 5px;" onclick="clearBackgroundImage()">❌ Удалить фоновое фото</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-buttons" class="sidebar-tab-content">
+                        <!-- Настройки кнопок -->
+                        <div class="sidebar-section">
+                            <h3>🎛️ Настройки кнопок режимов</h3>
+                            <div class="switch-container">
+                                <span style="font-size: 0.85rem; font-weight: bold; color: #fff;">Режим перемещения кнопок</span>
+                                <label class="checkbox-label" style="margin: 0;">
+                                    <input type="checkbox" id="btn-drag-enabled" onchange="toggleButtonDrag()"> Вкл
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Редактировать кнопку:</label>
+                                <select id="btn-selector" onchange="loadButtonSettingsToForm()">
+                                    <option value="word">📝 Word (Слово)</option>
+                                    <option value="spelling">🔤 Spelling (Спеллинг)</option>
+                                    <option value="example">💬 Example (Пример)</option>
+                                </select>
+                            </div>
+                            <div id="btn-settings-form" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                                <div class="form-group" style="padding-bottom: 10px; border-bottom: 1px dashed var(--border-color);">
+                                    <label class="checkbox-label" style="color: var(--neon-pink); font-weight: bold;">
+                                        <input type="checkbox" id="btn-show" onchange="applyButtonSettings()"> Отображать эту кнопку (Вкл/Выкл)
+                                    </label>
+                                </div>
+                                <div class="form-group"><label>Текст:</label><input type="text" id="btn-text" oninput="applyButtonSettings()"></div>
+                                <div class="form-row form-group">
+                                    <div><label>Ширина:</label><input type="text" id="btn-width" placeholder="auto или 120px" oninput="applyButtonSettings()"></div>
+                                    <div><label>Высота:</label><input type="text" id="btn-height" placeholder="auto или 40px" oninput="applyButtonSettings()"></div>
+                                </div>
+                                <div class="form-row form-group">
+                                    <div>
+                                        <label>Шрифт:</label>
+                                        <select id="btn-font" onchange="applyButtonSettings()">
+                                            <option value="Arial">Arial</option><option value="Roboto">Roboto</option><option value="Montserrat">Montserrat</option><option value="Open Sans">Open Sans</option><option value="Playfair Display">Playfair Display</option><option value="Oswald">Oswald</option><option value="Raleway">Raleway</option><option value="Poppins">Poppins</option><option value="Lato">Lato</option><option value="Comic Sans MS">Comic Sans MS</option>
+                                        </select>
+                                    </div>
+                                    <div><label>Размер шрифта (px):</label><input type="number" id="btn-font-size" min="10" max="32" value="14" oninput="applyButtonSettings()"></div>
+                                </div>
+                                <div class="form-row form-group">
+                                    <div><label>Текст:</label><input type="color" id="btn-text-color" onchange="applyButtonSettings()"></div>
+                                    <div><label>Фон:</label><input type="color" id="btn-bg-color" onchange="applyButtonSettings()"></div>
+                                    <div><label>Рамка:</label><input type="color" id="btn-border-color" onchange="applyButtonSettings()"></div>
+                                </div>
+                                <div class="form-row form-group">
+                                    <div>
+                                        <label>Стиль рамки:</label>
+                                        <select id="btn-border-style" onchange="applyButtonSettings()">
+                                            <option value="solid">Сплошная</option><option value="dashed">Пунктир</option><option value="none">Без рамки</option>
+                                        </select>
+                                    </div>
+                                    <div><label>Толщина: <span id="btn-border-width-val">1</span></label><input type="range" id="btn-border-width" min="0" max="5" oninput="applyButtonSettings()"></div>
+                                </div>
+                                <div class="form-group"><label>Скругление: <span id="btn-border-radius-val">6</span></label><input type="range" id="btn-border-radius" min="0" max="30" oninput="applyButtonSettings()"></div>
+                                <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 10px;">
+                                    <label>Позиция:</label>
+                                    <select id="btn-position-type" onchange="applyButtonSettings(true)">
+                                        <option value="top-center">Сверху по центру</option><option value="top-left">Сверху слева</option><option value="top-right">Сверху справа</option><option value="bottom-center">Снизу по центру</option><option value="bottom-left">Снизу слева</option><option value="bottom-right">Снизу справа</option><option value="free">Свободная (Drag & Drop)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row form-group" id="btn-coords-inputs" style="display: none;">
+                                    <div><label>Ось X (%):</label><input type="number" id="btn-x" min="0" max="100" oninput="applyButtonSettings()"></div>
+                                    <div><label>Ось Y (%):</label><input type="number" id="btn-y" min="0" max="100" oninput="applyButtonSettings()"></div>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="margin-top: 10px; border-color: #ff007f;" onclick="resetButtonPositions()">🔄 Сбросить позиции</button>
+                        </div>
+                    </div>
+
+                    <div id="tab-markers" class="sidebar-tab-content">
+                        <!-- Маркеры -->
+                        <div class="sidebar-section">
+                            <h3>📍 Маркеры (Текущий слайд)</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Кликайте по холсту, чтобы добавлять маркеры.</p>
+                            <div class="btn-group">
+                                <button class="btn btn-secondary" onclick="clearLastHotspot()">↩️ Удалить последний</button>
+                                <button class="btn btn-secondary" style="border-color: #ff003c;" onclick="clearAllHotspots()">🗑️ Очистить все</button>
+                            </div>
+                        </div>
+                        <div class="sidebar-section">
+                            <h3>🔊 Озвучка (TTS)</h3>
+                            <div class="form-group">
+                                <label>Язык синтезатора:</label>
+                                <select id="tts-lang" onchange="updateVoiceList()">
+                                    <option value="en-US">English (US)</option><option value="en-GB">English (UK)</option><option value="ru-RU">Русский</option><option value="de-DE">Deutsch</option><option value="fr-FR">Français</option><option value="zh-CN">Chinese</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Голос:</label><select id="tts-voice" onchange="updateAudioSettings()"></select></div>
+                            <div class="form-group"><label>Скорость речи: <span id="rate-val">1.0</span>x</label><input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="1" oninput="updateAudioSettings()"></div>
+                            <div class="form-group"><label>Тон речи: <span id="pitch-val">1.0</span></label><input type="range" id="tts-pitch" min="0.5" max="2" step="0.1" value="1" oninput="updateAudioSettings()"></div>
+                        </div>
+                    </div>
+
+                    <div id="tab-visual" class="sidebar-tab-content">
+                        <!-- Подложка -->
+                        <div class="sidebar-section">
+                            <h3>🔲 Подложка под постер</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Создает цветной фон и рамку непосредственно вокруг картинки, на которых можно располагать кнопки.</p>
+                            <div class="form-group">
+                                <label class="checkbox-label"><input type="checkbox" id="bd-enabled" onchange="updateBackdropSettings()"> Включить подложку постера</label>
+                            </div>
+                            <div id="bd-settings" style="display:none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+                                <div class="form-row form-group">
+                                    <div><label>Цвет:</label><input type="color" id="bd-color" value="#0d0d15" onchange="updateBackdropSettings()"></div>
+                                    <div><label>Прозрачность: <span id="bd-opacity-val">80</span>%</label><input type="range" id="bd-opacity" min="0" max="100" value="80" oninput="updateBackdropSettings()"></div>
+                                </div>
+                                <div class="form-row form-group">
+                                    <div><label>Размер отступов: <span id="bd-padding-val">40</span>px</label><input type="range" id="bd-padding" min="0" max="200" value="40" oninput="updateBackdropSettings()"></div>
+                                    <div><label>Скругление: <span id="bd-radius-val">12</span>px</label><input type="range" id="bd-radius" min="0" max="50" value="12" oninput="updateBackdropSettings()"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Визуал -->
+                        <div class="sidebar-section">
+                            <h3>✨ Неоновый стиль маркеров</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label"><input type="checkbox" id="show-border" checked onchange="updateVisualSettings()"> Видимая рамка маркера</label>
+                            </div>
+                            <div class="form-group" style="background: rgba(0, 243, 255, 0.1); padding: 8px; border-radius: 6px; border: 1px dashed var(--neon-cyan);">
+                                <label class="checkbox-label" style="color: var(--neon-cyan); font-weight: bold;">
+                                    <input type="checkbox" id="transparent-hotspot" onchange="updateVisualSettings()"> 
+                                    Полностью прозрачный фон маркера (без пятен)
+                                </label>
+                            </div>
+                            <div class="form-group"><label>Размер рамочки: <span id="size-val">60</span>px</label><input type="range" id="hotspot-size" min="20" max="160" value="60" oninput="updateVisualSettings()"></div>
+                            <div class="form-row form-group">
+                                <div><label>Свечение:</label><input type="color" id="neon-color" value="#00f3ff" onchange="updateVisualSettings()"></div>
+                                <div><label>Стиль обводки:</label><select id="stroke-style" onchange="updateVisualSettings()"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
+                            </div>
+                            <div class="form-group"><label>Интенсивность: <span id="glow-val">15</span>px</label><input type="range" id="glow-intensity" min="5" max="50" value="15" oninput="updateVisualSettings()"></div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>😊 Рефлексия и Кастомные Награды</h3>
+                            <div class="form-group">
+                                <label>Эмоджи (через пробел, до 5 шт):</label>
+                                <input type="text" id="ref-emojis" value="🔥 ⚡ 🤖 🚀 💜" oninput="updateReflectionSettings()">
+                            </div>
+                            
+                            <div class="form-group" style="background: rgba(255,0,127,0.1); padding: 10px; border-radius: 8px; border: 1px solid var(--neon-pink);">
+                                <label style="color: var(--neon-pink); font-weight: bold;">Своя картинка-награда (например, Яйцо):</label>
+                                <div class="file-upload-wrapper" style="margin-bottom: 10px;">
+                                    <button class="btn btn-purple" style="font-size: 0.85rem;">🥚 Загрузить картинку награды</button>
+                                    <input type="file" accept="image/*" onchange="handleRewardUpload(event)">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 5px;">
+                                    <label>Размер картинки-награды: <span id="reward-size-val">40</span>px</label>
+                                    <input type="range" id="reward-size" min="20" max="100" value="40" oninput="updateReflectionSettings()">
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 5px;" onclick="clearRewardImage()">❌ Удалить кастомную награду</button>
+                            </div>
+
+                            <div class="form-row form-group" style="margin-top: 15px;">
+                                <div><label>Цвет панели:</label><input type="color" id="ref-color" value="#9d00ff" onchange="updateReflectionSettings()"></div>
+                                <div><label>Масштаб: <span id="ref-scale-val">1.0</span>x</label><input type="range" id="ref-scale" min="0.6" max="1.8" step="0.1" value="1" oninput="updateReflectionSettings()"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Позиция панели:</label>
+                                <select id="ref-pos" onchange="updateReflectionSettings(true)">
+                                    <option value="50,90">Снизу - По центру</option><option value="15,90">Снизу - Слева</option><option value="85,90">Снизу - Справа</option><option value="50,10">Сверху - По центру</option><option value="free">Свободная (Drag & Drop)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-logo" class="sidebar-tab-content">
+                        <!-- Логотип -->
+                        <div class="sidebar-section">
+                            <h3>🏷️ Настройки Логотипа</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="logo-enabled" onchange="updateLogoSettings()">
+                                    Включить отображение логотипа на холсте
+                                </label>
+                            </div>
+                            <div id="logo-settings-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+                                <div class="form-group">
+                                    <label>Тип отображения:</label>
+                                    <select id="logo-type" onchange="updateLogoSettings()">
+                                        <option value="text">Текстовая надпись</option>
+                                        <option value="image">Картинка (загрузка с компьютера)</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="logo-text-group" class="form-group">
+                                    <label>Текст логотипа / надписи:</label>
+                                    <input type="text" id="logo-text" value="MY SCHOOL PRO" oninput="updateLogoSettings()">
+                                    <div class="form-row form-group" style="margin-top: 10px;">
+                                        <div>
+                                            <label>Шрифт:</label>
+                                            <select id="logo-font" onchange="updateLogoSettings()">
+                                                <option value="Arial">Arial</option><option value="Roboto">Roboto</option><option value="Montserrat">Montserrat</option><option value="Open Sans">Open Sans</option><option value="Playfair Display">Playfair Display</option><option value="Oswald">Oswald</option><option value="Poppins">Poppins</option><option value="Comic Sans MS">Comic Sans MS</option>
+                                            </select>
+                                        </div>
+                                        <div><label>Цвет:</label><input type="color" id="logo-color" value="#00f3ff" onchange="updateLogoSettings()"></div>
+                                    </div>
+                                </div>
+
+                                <div id="logo-image-group" class="form-group" style="display: none;">
+                                    <div class="file-upload-wrapper" style="margin-bottom: 10px;">
+                                        <button class="btn btn-purple" style="font-size: 0.85rem;">📁 Загрузить картинку логотипа</button>
+                                        <input type="file" accept="image/*" onchange="handleLogoUpload(event)">
+                                    </div>
+                                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 5px;" onclick="clearLogoImage()">❌ Удалить фото логотипа</button>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Размер / Масштаб: <span id="logo-size-val">24</span>px</label>
+                                    <input type="range" id="logo-size" min="14" max="150" value="24" oninput="updateLogoSettings()">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Ссылка при клике (с http:// или https://):</label>
+                                    <input type="text" id="logo-url" placeholder="https://mysite.ru" oninput="updateLogoSettings()">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Позиция на экране:</label>
+                                    <select id="logo-pos-type" onchange="updateLogoSettings(true)">
+                                        <option value="10,10">Сверху слева</option>
+                                        <option value="90,10">Сверху справа</option>
+                                        <option value="50,10">Сверху по центру</option>
+                                        <option value="10,90">Снизу слева</option>
+                                        <option value="90,90">Снизу справа</option>
+                                        <option value="free">Свободная (Drag & Drop)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-project" class="sidebar-tab-content">
+                        <!-- Проект -->
+                        <div class="sidebar-section">
+                            <h3>📏 Ориентация (для Genially/Iframe)</h3>
+                            <div class="form-group">
+                                <select id="proj-orientation" onchange="updateOrientation()">
+                                    <option value="auto">Авто (Адаптировать под экран)</option>
+                                    <option value="landscape">Альбомная (16:9, горизонтально)</option>
+                                    <option value="portrait">Книжная (9:16, вертикально)</option>
+                                </select>
+                            </div>
+                            <p style="font-size: 0.75rem; color: var(--neon-pink); margin-top: 5px;">Для Genially обязательно выберите <b>"Альбомная (16:9)"</b>. Настройки применятся при экспорте.</p>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>💾 Управление проектом</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Сохраняйте прогресс в файл .json, чтобы продолжить работу позже на любом устройстве.</p>
+                            <div class="btn-group">
+                                <button class="btn" onclick="saveProjectJSON()">⬇️ Сохранить JSON</button>
+                                <div class="file-upload-wrapper">
+                                    <button class="btn btn-secondary" style="width: 100%;">⬆️ Загрузить JSON</button>
+                                    <input type="file" accept=".json" onchange="loadProjectJSON(event)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ИДЕАЛЬНАЯ ВЕРСИЯ КАНВАСА ИЗ ВЕРСИИ 7 -->
+            <div class="workspace" id="editor-workspace">
+                <div class="empty-state" id="editor-empty">
+                    <h2>Постер не загружен</h2>
+                    <p style="margin-top: 10px;">Выберите слайд и загрузите изображение во вкладке "Контент", чтобы начать</p>
+                </div>
+                
+                <div class="canvas-container" id="editor-canvas-wrap" style="display: none;">
+                    <div class="canvas-container-inner" id="editor-canvas" onclick="handleCanvasClick(event)">
+                        <div class="poster-backdrop" id="editor-backdrop-layer" style="display:none;"></div>
+                        <img id="editor-img" src="" alt="Poster">
+                        <div class="reflection-panel" id="editor-reflection"></div>
+                        <div class="mode-btn" id="editor-btn-word" data-btn-type="word" onclick="handleBtnEditorClick('word', event)"></div>
+                        <div class="mode-btn" id="editor-btn-spelling" data-btn-type="spelling" onclick="handleBtnEditorClick('spelling', event)"></div>
+                        <div class="mode-btn" id="editor-btn-example" data-btn-type="example" onclick="handleBtnEditorClick('example', event)"></div>
+                        <div class="custom-logo-overlay" id="editor-logo" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PREVIEW MODE ================= -->
+        <section id="preview-section" class="view-section">
+            <div class="workspace" id="preview-workspace">
+                <div class="slide-nav prev-slide" id="preview-prev" onclick="changePreviewSlide(-1)" style="display:none;">&#10094;</div>
+                <div class="slide-nav next-slide" id="preview-next" onclick="changePreviewSlide(1)" style="display:none;">&#10095;</div>
+
+                <div class="canvas-container" id="preview-canvas-wrap" style="display: none;">
+                    <div class="canvas-container-inner" id="preview-canvas">
+                        <div class="poster-backdrop" id="preview-backdrop-layer" style="display:none;"></div>
+                        <img id="preview-img" src="" alt="Poster Preview">
+                        <div class="reflection-panel" id="preview-reflection"></div>
+                        <div class="mode-btn active-mode" id="preview-btn-word" onclick="setSpeechMode('word')"></div>
+                        <div class="mode-btn" id="preview-btn-spelling" onclick="setSpeechMode('spelling')"></div>
+                        <div class="mode-btn" id="preview-btn-example" onclick="setSpeechMode('example')"></div>
+                        <div class="custom-logo-overlay" id="preview-logo" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= МОДАЛЬНОЕ ОКНО ЭКСПОРТА ================= -->
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📦 Экспорт и встраивание (Genially / LMS)</h2>
+                <button class="close-modal" onclick="closeModal('export-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #fff; margin-bottom: 8px;">1. Автономный файл тренажера (HTML)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Генерирует независимый файл. Идеально для отправки ученикам напрямую.</p>
+                    <button class="btn" style="width: auto;" onclick="exportStandaloneHTML()">⬇️ Скачать neon_trainer.html</button>
+                </div>
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--neon-pink); margin-bottom: 8px;">2. Genially Embed: Iframe-формат (Рекомендуется)</h3>
+                    <div class="instructions-box">
+                        Вставьте этот код в блок <b>"Вставка -> Инородный код (Iframe)"</b> в Genially. 
+                        <b>ИСПРАВЛЕНО:</b> Код возвращен к эталону версии 7. Масштабирование гарантированно будет точным и правильным!
+                    </div>
+                    <button class="btn btn-secondary" style="width: auto; margin-bottom: 10px;" onclick="generateGeniallyIframe()">⚙️ Сгенерировать Iframe для Genially</button>
+                    <div id="div-code-container" style="display: none;">
+                        <textarea class="code-block" id="genially-div-code" readonly style="width: 100%; height: 120px;"></textarea>
+                        <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;" onclick="copyToClipboard('genially-div-code')">📋 Копировать код</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" style="width: auto;" onclick="closeModal('export-modal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Уведомление</div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        const defaultButtonStyles = {
+            show: true, text: 'Button', textColor: '#ffffff', fontSize: 16, fontFamily: 'Segoe UI', bgColor: 'rgba(0,0,0,0.6)', borderColor: '#00f3ff', borderWidth: 1, borderStyle: 'solid', borderRadius: 8, width: '120px', height: '40px', positionType: 'top-center', x: 50, y: 10
+        };
+
+        const appState = {
+            slides: [ { posterBase64: null, words: [], sentences: [], hotspots: [] } ],
+            orientation: 'auto',
+            posterSize: 100, 
+            backdrop: { enabled: false, color: '#0d0d15', opacity: 80, padding: 40, radius: 12 },
+            background: { enabled: false, color: '#0d0d15', imageBase64: null, padding: 20 },
+            buttonStyles: {
+                dragEnabled: false,
+                word: { ...defaultButtonStyles, text: '📝 Word', x: 30, y: 5 },
+                spelling: { ...defaultButtonStyles, text: '🔤 Spelling', x: 50, y: 5 },
+                example: { ...defaultButtonStyles, text: '💬 Example', x: 70, y: 5 }
+            },
+            audio: { lang: 'en-US', voiceURI: null, rate: 1.0, pitch: 1.0 },
+            visuals: { color: '#00f3ff', strokeStyle: 'solid', glowIntensity: 15, hotspotSize: 60, showBorder: true, transparentBg: false },
+            reflection: { x: 50, y: 90, color: '#9d00ff', scale: 1.0, emojis: ['🔥', '⚡', '🤖', '🚀', '💜'], rewardImageBase64: null, rewardImageSize: 40 },
+            logo: { enabled: false, type: 'text', text: 'MY SCHOOL PRO', font: 'Arial', color: '#00f3ff', imageBase64: null, size: 24, url: '', x: 10, y: 10 },
+            previewSpeechMode: 'word'
+        };
+
+        let currentSlideIndex = 0;
+        let availableVoices = []; let draggedElement = null; let dragType = null; let draggedId = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSlideTabs(); 
+            initSpeechSynthesis(); 
+            applyPosterSize();
+            updateVisualSettings(); 
+            updateBackdropSettings();
+            updateReflectionSettings(); 
+            updateLogoSettings(); 
+            loadButtonSettingsToForm(); 
+            renderButtons(); 
+            initDragAndDrop();
+        });
+
+        // ================= РАЗМЕР ПОСТЕРА =================
+        function updatePosterSize() {
+            appState.posterSize = document.getElementById('poster-size').value;
+            document.getElementById('poster-size-val').innerText = appState.posterSize;
+            applyPosterSize();
+        }
+
+        function applyPosterSize() {
+            document.documentElement.style.setProperty('--poster-scale', appState.posterSize / 100);
+        }
+
+        // ================= ПОДЛОЖКА (BACKDROP) =================
+        function updateBackdropSettings() {
+            appState.backdrop.enabled = document.getElementById('bd-enabled').checked;
+            appState.backdrop.color = document.getElementById('bd-color').value;
+            appState.backdrop.opacity = parseInt(document.getElementById('bd-opacity').value);
+            appState.backdrop.padding = parseInt(document.getElementById('bd-padding').value);
+            appState.backdrop.radius = parseInt(document.getElementById('bd-radius').value);
+
+            document.getElementById('bd-settings').style.display = appState.backdrop.enabled ? 'block' : 'none';
+            document.getElementById('bd-opacity-val').innerText = appState.backdrop.opacity;
+            document.getElementById('bd-padding-val').innerText = appState.backdrop.padding;
+            document.getElementById('bd-radius-val').innerText = appState.backdrop.radius;
+
+            applyBackdrop();
+        }
+
+        function applyBackdrop() {
+            ['editor', 'preview'].forEach(prefix => {
+                const inner = document.getElementById(`${prefix}-canvas`);
+                const bdLayer = document.getElementById(`${prefix}-backdrop-layer`);
+                if(!inner || !bdLayer) return;
+
+                if (appState.backdrop.enabled) {
+                    inner.style.padding = `${appState.backdrop.padding}px`;
+                    bdLayer.style.display = 'block';
+                    bdLayer.style.backgroundColor = appState.backdrop.color;
+                    bdLayer.style.opacity = appState.backdrop.opacity / 100;
+                    bdLayer.style.borderRadius = `${appState.backdrop.radius}px`;
+                } else {
+                    inner.style.padding = '0px';
+                    bdLayer.style.display = 'none';
+                }
+            });
+        }
+
+        // ================= УПРАВЛЕНИЕ СЛАЙДАМИ =================
+        function addSlide() {
+            if (appState.slides.length >= 10) { showToast("Максимум 10 слайдов!", true); return; }
+            appState.slides.push({ posterBase64: null, words: [], sentences: [], hotspots: [] });
+            switchSlide(appState.slides.length - 1);
+        }
+
+        function deleteSlide(idx) {
+            if (appState.slides.length <= 1) { showToast("Нельзя удалить единственный слайд!", true); return; }
+            if (confirm("Точно удалить этот слайд?")) {
+                appState.slides.splice(idx, 1);
+                if (currentSlideIndex >= appState.slides.length) currentSlideIndex = appState.slides.length - 1;
+                switchSlide(currentSlideIndex);
+            }
+        }
+
+        function switchSlide(idx) {
+            currentSlideIndex = idx;
+            renderSlideTabs();
+            
+            const slide = appState.slides[currentSlideIndex];
+            document.getElementById('words-input').value = slide.words.join('\n');
+            document.getElementById('sentences-input').value = slide.sentences.join('\n');
+            
+            if (slide.posterBase64) {
+                document.getElementById('editor-img').src = slide.posterBase64;
+                document.getElementById('preview-img').src = slide.posterBase64;
+                document.getElementById('editor-empty').style.display = 'none';
+                document.getElementById('editor-canvas-wrap').style.display = 'flex';
+                document.getElementById('preview-canvas-wrap').style.display = 'flex';
+            } else {
+                document.getElementById('editor-img').src = '';
+                document.getElementById('preview-img').src = '';
+                document.getElementById('editor-empty').style.display = 'block';
+                document.getElementById('editor-canvas-wrap').style.display = 'none';
+                document.getElementById('preview-canvas-wrap').style.display = 'none';
+            }
+            renderAllHotspots();
+        }
+
+        function renderSlideTabs() {
+            const container = document.getElementById('slides-list');
+            container.innerHTML = '';
+            appState.slides.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary' + (idx === currentSlideIndex ? ' active-slide-btn' : '');
+                btn.style.padding = '5px 10px';
+                btn.style.fontSize = '0.8rem';
+                btn.style.width = 'auto';
+                btn.innerText = `Слайд ${idx + 1}`;
+                btn.onclick = () => switchSlide(idx);
+                
+                const del = document.createElement('span');
+                del.innerHTML = ' &times;';
+                del.style.color = '#ff003c';
+                del.style.cursor = 'pointer';
+                del.style.marginLeft = '5px';
+                del.onclick = (e) => { e.stopPropagation(); deleteSlide(idx); };
+                
+                if (appState.slides.length > 1) btn.appendChild(del);
+                container.appendChild(btn);
+            });
+            
+            const prev = document.getElementById('preview-prev');
+            const next = document.getElementById('preview-next');
+            if (prev && next) {
+                prev.style.display = appState.slides.length > 1 ? 'flex' : 'none';
+                next.style.display = appState.slides.length > 1 ? 'flex' : 'none';
+            }
+        }
+
+        function changePreviewSlide(dir) {
+            let newIdx = currentSlideIndex + dir;
+            if (newIdx < 0) newIdx = appState.slides.length - 1;
+            if (newIdx >= appState.slides.length) newIdx = 0;
+            switchSlide(newIdx);
+        }
+
+        // ================= ОРИЕНТАЦИЯ И ТАБЫ =================
+        function updateOrientation() {
+            appState.orientation = document.getElementById('proj-orientation').value;
+            showToast("Ориентация применена (видна при экспорте)");
+        }
+
+        function switchMainTab(mode) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            if (mode === 'editor') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('editor-section').classList.add('active');
+            } else if (mode === 'preview') {
+                if (!appState.slides[currentSlideIndex].posterBase64) { showToast("Загрузите постер!", true); return; }
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('preview-section').classList.add('active');
+                renderAllHotspots(); renderReflectionPanel(); renderButtons(); renderLogo();
+            }
+        }
+
+        function switchSidebarTab(tabId) {
+            document.querySelectorAll('.s-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sidebar-tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // ================= АУДИО (TTS) =================
+        function initSpeechSynthesis() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices(); updateVoiceList();
+                window.speechSynthesis.onvoiceschanged = () => { availableVoices = window.speechSynthesis.getVoices(); updateVoiceList(); };
+            } else showToast("Браузер не поддерживает озвучку!", true);
+        }
+        
+        function updateVoiceList() {
+            const voiceSelect = document.getElementById('tts-voice'); const selectedLang = document.getElementById('tts-lang').value;
+            voiceSelect.innerHTML = ''; appState.audio.lang = selectedLang;
+            const filteredVoices = availableVoices.filter(v => v.lang.includes(selectedLang.slice(0, 2)));
+            if (filteredVoices.length === 0) voiceSelect.add(new Option("Стандартный голос", ""));
+            else filteredVoices.forEach(v => { const opt = new Option(`${v.name} (${v.lang})`, v.voiceURI); if (v.default) opt.selected = true; voiceSelect.add(opt); });
+            updateAudioSettings();
+        }
+        
+        function updateAudioSettings() {
+            appState.audio.voiceURI = document.getElementById('tts-voice').value || null; appState.audio.rate = parseFloat(document.getElementById('tts-rate').value); appState.audio.pitch = parseFloat(document.getElementById('tts-pitch').value);
+            document.getElementById('rate-val').innerText = appState.audio.rate.toFixed(1); document.getElementById('pitch-val').innerText = appState.audio.pitch.toFixed(1);
+        }
+        
+        function speakText(text, isSpelling = false) {
+            if (!('speechSynthesis' in window) || !text) return; window.speechSynthesis.cancel();
+            if (isSpelling) { text.replace(/[^a-zA-Zа-яА-Я0-9]/g, '').split('').forEach((letter) => { const u = new SpeechSynthesisUtterance(letter); applyVoiceParams(u); u.rate = Math.max(0.6, appState.audio.rate * 0.85); window.speechSynthesis.speak(u); });
+            } else { const u = new SpeechSynthesisUtterance(text); applyVoiceParams(u); window.speechSynthesis.speak(u); }
+        }
+        function applyVoiceParams(u) { u.lang = appState.audio.lang; u.rate = appState.audio.rate; u.pitch = appState.audio.pitch; if (appState.audio.voiceURI) { const v = availableVoices.find(val => val.voiceURI === appState.audio.voiceURI); if (v) u.voice = v; } }
+
+        // ================= ЗАГРУЗКА ИЗОБРАЖЕНИЙ =================
+        function handleImageUpload(event, target) {
+            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+            reader.onload = function(e) {
+                if (target === 'poster') { appState.slides[currentSlideIndex].posterBase64 = e.target.result; switchSlide(currentSlideIndex); showToast("Постер загружен!"); }
+                else if (target === 'background') { appState.background.imageBase64 = e.target.result; appState.background.enabled = true; document.getElementById('bg-enabled').checked = true; document.getElementById('bg-settings-container').style.display = 'block'; updateBackgroundDisplay(); showToast("Фон загружен!"); }
+            }; reader.readAsDataURL(file);
+        }
+        function clearBackgroundImage() { appState.background.imageBase64 = null; updateBackgroundDisplay(); showToast("Фон удален"); }
+        function updateBackgroundSettings() { appState.background.enabled = document.getElementById('bg-enabled').checked; appState.background.color = document.getElementById('bg-color').value; appState.background.padding = parseInt(document.getElementById('bg-padding').value); document.getElementById('bg-padding-val').innerText = appState.background.padding; document.getElementById('bg-settings-container').style.display = appState.background.enabled ? 'block' : 'none'; updateBackgroundDisplay(); }
+        
+        function updateBackgroundDisplay() {
+            ['editor', 'preview'].forEach(prefix => {
+                const container = document.getElementById(`${prefix}-canvas-wrap`);
+                if(!container) return;
+                if (appState.background.enabled) { container.style.padding = `${appState.background.padding}px`; container.style.backgroundColor = appState.background.color; container.style.backgroundImage = appState.background.imageBase64 ? `url(${appState.background.imageBase64})` : 'none'; }
+                else { container.style.padding = '0px'; container.style.background = 'transparent'; }
+            });
+        }
+
+        function handleRewardUpload(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { appState.reflection.rewardImageBase64 = ev.target.result; renderReflectionPanel(); showToast("Награда загружена!"); }; reader.readAsDataURL(file); }
+        function clearRewardImage() { appState.reflection.rewardImageBase64 = null; renderReflectionPanel(); showToast("Награда удалена"); }
+        function handleLogoUpload(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { appState.logo.imageBase64 = ev.target.result; renderLogo(); showToast("Логотип загружен!"); }; reader.readAsDataURL(file); }
+        function clearLogoImage() { appState.logo.imageBase64 = null; renderLogo(); showToast("Логотип удален"); }
+
+        // ================= ЛОГОТИП И ВИЗУАЛ =================
+        function updateLogoSettings(fromDropdown = false) {
+            appState.logo.enabled = document.getElementById('logo-enabled').checked; appState.logo.type = document.getElementById('logo-type').value; appState.logo.text = document.getElementById('logo-text').value; appState.logo.font = document.getElementById('logo-font').value; appState.logo.color = document.getElementById('logo-color').value; appState.logo.size = parseInt(document.getElementById('logo-size').value); appState.logo.url = document.getElementById('logo-url').value.trim();
+            document.getElementById('logo-size-val').innerText = appState.logo.size; document.getElementById('logo-settings-container').style.display = appState.logo.enabled ? 'block' : 'none'; document.getElementById('logo-text-group').style.display = appState.logo.type === 'text' ? 'block' : 'none'; document.getElementById('logo-image-group').style.display = appState.logo.type === 'image' ? 'block' : 'none';
+            if (fromDropdown) { const pos = document.getElementById('logo-pos-type').value.split(','); if (pos[0] !== 'free') { appState.logo.x = parseFloat(pos[0]); appState.logo.y = parseFloat(pos[1]); } }
+            loadGoogleFont(appState.logo.font); renderLogo();
+        }
+
+        function renderLogo() {
+            ['editor-logo', 'preview-logo'].forEach(id => {
+                const el = document.getElementById(id); if (!el) return;
+                if (!appState.logo.enabled) { el.style.display = 'none'; return; }
+                el.style.display = 'flex'; el.style.left = `${appState.logo.x}%`; el.style.top = `${appState.logo.y}%`; el.innerHTML = '';
+                let innerContent = '';
+                if (appState.logo.type === 'text') innerContent = `<span style="font-family: '${appState.logo.font}', sans-serif; font-size: ${appState.logo.size}px; color: ${appState.logo.color}; text-shadow: 0 0 8px rgba(0,0,0,0.8);">${appState.logo.text || 'LOGO'}</span>`;
+                else if (appState.logo.imageBase64) innerContent = `<img src="${appState.logo.imageBase64}" style="height: ${appState.logo.size}px; width: auto;" alt="Logo">`;
+                else innerContent = `<span style="font-size: 14px; color: var(--neon-pink); border: 1px dashed var(--neon-pink); padding: 4px;">Картинка</span>`;
+                if (appState.logo.url && id === 'preview-logo') el.innerHTML = `<a href="${appState.logo.url}" target="_blank" onclick="event.stopPropagation();">${innerContent}</a>`;
+                else el.innerHTML = innerContent;
+            });
+        }
+        function loadGoogleFont(fontFamily) { if (!['Arial', 'Comic Sans MS', 'Segoe UI', 'Helvetica', 'sans-serif'].includes(fontFamily) && !document.getElementById('font-' + fontFamily.replace(/\s+/g, '-'))) { const link = document.createElement('link'); link.id = 'font-' + fontFamily.replace(/\s+/g, '-'); link.rel = 'stylesheet'; link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}&display=swap`; document.head.appendChild(link); } }
+
+        // ================= КНОПКИ РЕЖИМОВ =================
+        function toggleButtonDrag() { appState.buttonStyles.dragEnabled = document.getElementById('btn-drag-enabled').checked; document.querySelectorAll('.mode-btn').forEach(btn => { if(appState.buttonStyles.dragEnabled) btn.classList.add('draggable'); else btn.classList.remove('draggable'); }); if(!appState.buttonStyles.dragEnabled) renderButtons(); }
+        
+        function loadButtonSettingsToForm() {
+            const settings = appState.buttonStyles[document.getElementById('btn-selector').value];
+            document.getElementById('btn-show').checked = settings.show !== false;
+            document.getElementById('btn-text').value = settings.text; 
+            document.getElementById('btn-width').value = settings.width || 'auto'; 
+            document.getElementById('btn-height').value = settings.height || 'auto'; 
+            document.getElementById('btn-font').value = settings.fontFamily; 
+            document.getElementById('btn-font-size').value = settings.fontSize; 
+            document.getElementById('btn-text-color').value = settings.textColor; 
+            document.getElementById('btn-bg-color').value = settings.bgColor; 
+            document.getElementById('btn-border-color').value = settings.borderColor; 
+            document.getElementById('btn-border-style').value = settings.borderStyle; 
+            document.getElementById('btn-border-width').value = settings.borderWidth; 
+            document.getElementById('btn-border-width-val').innerText = settings.borderWidth; 
+            document.getElementById('btn-border-radius').value = settings.borderRadius; 
+            document.getElementById('btn-border-radius-val').innerText = settings.borderRadius; 
+            document.getElementById('btn-position-type').value = settings.positionType;
+            const isFree = settings.positionType === 'free'; document.getElementById('btn-coords-inputs').style.display = isFree ? 'flex' : 'none'; document.getElementById('btn-x').value = settings.x; document.getElementById('btn-y').value = settings.y;
+        }
+        
+        function applyButtonSettings(updateCoords = false) {
+            const settings = appState.buttonStyles[document.getElementById('btn-selector').value];
+            settings.show = document.getElementById('btn-show').checked;
+            settings.text = document.getElementById('btn-text').value; 
+            settings.width = document.getElementById('btn-width').value; 
+            settings.height = document.getElementById('btn-height').value; 
+            settings.fontFamily = document.getElementById('btn-font').value; 
+            settings.fontSize = parseInt(document.getElementById('btn-font-size').value); 
+            settings.textColor = document.getElementById('btn-text-color').value; 
+            settings.bgColor = document.getElementById('btn-bg-color').value; 
+            settings.borderColor = document.getElementById('btn-border-color').value; 
+            settings.borderStyle = document.getElementById('btn-border-style').value; 
+            settings.borderWidth = parseInt(document.getElementById('btn-border-width').value); 
+            settings.borderRadius = parseInt(document.getElementById('btn-border-radius').value); 
+            document.getElementById('btn-border-width-val').innerText = settings.borderWidth; document.getElementById('btn-border-radius-val').innerText = settings.borderRadius; settings.positionType = document.getElementById('btn-position-type').value; const isFree = settings.positionType === 'free'; document.getElementById('btn-coords-inputs').style.display = isFree ? 'flex' : 'none';
+            if (updateCoords && !isFree) { switch(settings.positionType) { case 'top-center': settings.x=50; settings.y=5; break; case 'top-left': settings.x=10; settings.y=5; break; case 'top-right': settings.x=90; settings.y=5; break; case 'bottom-center': settings.x=50; settings.y=95; break; case 'bottom-left': settings.x=10; settings.y=95; break; case 'bottom-right': settings.x=90; settings.y=95; break; } document.getElementById('btn-x').value = settings.x; document.getElementById('btn-y').value = settings.y; } else if (isFree) { settings.x = parseFloat(document.getElementById('btn-x').value); settings.y = parseFloat(document.getElementById('btn-y').value); }
+            loadGoogleFont(settings.fontFamily); renderButtons();
+        }
+        
+        function resetButtonPositions() { ['word','spelling','example'].forEach((t, i) => { appState.buttonStyles[t].positionType='top-center'; appState.buttonStyles[t].x = 30 + (i*20); appState.buttonStyles[t].y = 5; }); loadButtonSettingsToForm(); renderButtons(); showToast("Сброшено"); }
+        
+        function renderButtons() {
+            ['word', 'spelling', 'example'].forEach(type => { 
+                const s = appState.buttonStyles[type]; 
+                ['editor-btn-', 'preview-btn-'].forEach(prefix => { 
+                    const btn = document.getElementById(prefix + type); if(!btn) return; 
+                    if (s.show === false) {
+                        btn.style.display = 'none';
+                    } else {
+                        btn.style.display = 'flex';
+                        btn.innerText = s.text; btn.style.fontFamily = `"${s.fontFamily}", sans-serif`; btn.style.fontSize = `${s.fontSize}px`; btn.style.color = s.textColor; btn.style.backgroundColor = s.bgColor; btn.style.border = `${s.borderWidth}px ${s.borderStyle} ${s.borderColor}`; btn.style.borderRadius = `${s.borderRadius}px`; btn.style.width = s.width || 'auto'; btn.style.height = s.height || 'auto'; btn.style.left = `${s.x}%`; btn.style.top = `${s.y}%`; if(appState.buttonStyles.dragEnabled) btn.classList.add('draggable'); 
+                    }
+                }); 
+            });
+        }
+        
+        function handleBtnEditorClick(mode, e) { if (appState.buttonStyles.dragEnabled) { e.preventDefault(); } else { document.getElementById('btn-selector').value = mode; loadButtonSettingsToForm(); switchSidebarTab('tab-buttons'); showToast(`Режим: ${mode}`); } }
+        function setSpeechMode(mode) { appState.previewSpeechMode = mode; ['word', 'spelling', 'example'].forEach(t => { const el = document.getElementById('preview-btn-' + t); if(el) el.classList.remove('active-mode'); }); const activeBtn = document.getElementById('preview-btn-' + mode); if(activeBtn) activeBtn.classList.add('active-mode'); }
+
+        // ================= МАРКЕРЫ =================
+        function updateWordsList() { appState.slides[currentSlideIndex].words = document.getElementById('words-input').value.split('\n').map(w => w.trim()).filter(w => w.length > 0); renderAllHotspots(); }
+        function updateSentencesList() { appState.slides[currentSlideIndex].sentences = document.getElementById('sentences-input').value.split('\n').map(s => s.trim()).filter(s => s.length > 0); }
+        
+        function handleCanvasClick(event) {
+            if (draggedElement || event.target.closest('.hotspot') || event.target.closest('.reflection-panel') || event.target.closest('.mode-btn') || event.target.closest('.custom-logo-overlay')) return;
+            if (!appState.slides[currentSlideIndex].posterBase64) return;
+            const editorCanvas = document.getElementById('editor-canvas');
+            const rect = editorCanvas.getBoundingClientRect();
+            if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return;
+            appState.slides[currentSlideIndex].hotspots.push({ id: 'hs_' + Date.now(), wordIndex: appState.slides[currentSlideIndex].hotspots.length, x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
+            renderAllHotspots();
+        }
+        function deleteHotspot(id, event) { event.stopPropagation(); appState.slides[currentSlideIndex].hotspots = appState.slides[currentSlideIndex].hotspots.filter(hs => hs.id !== id); appState.slides[currentSlideIndex].hotspots.forEach((hs, idx) => hs.wordIndex = idx); renderAllHotspots(); }
+        function clearLastHotspot() { if (appState.slides[currentSlideIndex].hotspots.length > 0) { appState.slides[currentSlideIndex].hotspots.pop(); renderAllHotspots(); } }
+        function clearAllHotspots() { if (confirm("Очистить слайд?")) { appState.slides[currentSlideIndex].hotspots = []; renderAllHotspots(); } }
+        
+        function renderAllHotspots() {
+            document.querySelectorAll('.hotspot').forEach(el => el.remove()); const slide = appState.slides[currentSlideIndex];
+            slide.hotspots.forEach((hs, idx) => {
+                const wordText = slide.words[hs.wordIndex] || `Слово #${hs.wordIndex + 1}`;
+                const editorHs = document.createElement('div'); editorHs.className = 'hotspot'; editorHs.style.left = `${hs.x}%`; editorHs.style.top = `${hs.y}%`; editorHs.dataset.id = hs.id;
+                editorHs.innerHTML = `<span class="hotspot-badge">${idx + 1}</span><span class="hotspot-label">${wordText}</span><div class="hotspot-delete" onclick="deleteHotspot('${hs.id}', event)">&times;</div>`;
+                document.getElementById('editor-canvas').appendChild(editorHs);
+                
+                const previewHs = document.createElement('div'); previewHs.className = 'hotspot'; previewHs.style.left = `${hs.x}%`; previewHs.style.top = `${hs.y}%`; previewHs.innerHTML = `<span class="hotspot-label">${wordText}</span>`;
+                previewHs.onclick = () => { const word = slide.words[hs.wordIndex]; const sentence = slide.sentences[hs.wordIndex]; if (appState.previewSpeechMode === 'word') speakText(word); else if (appState.previewSpeechMode === 'spelling') speakText(word, true); else if (appState.previewSpeechMode === 'example') speakText(sentence || word); };
+                document.getElementById('preview-canvas').appendChild(previewHs);
+            });
+        }
+
+        // ================= НЕОН И РЕФЛЕКСИЯ =================
+        function updateVisualSettings() {
+            appState.visuals.color = document.getElementById('neon-color').value; appState.visuals.strokeStyle = document.getElementById('stroke-style').value; appState.visuals.glowIntensity = document.getElementById('glow-intensity').value; appState.visuals.hotspotSize = document.getElementById('hotspot-size').value; appState.visuals.showBorder = document.getElementById('show-border').checked; appState.visuals.transparentBg = document.getElementById('transparent-hotspot').checked; document.getElementById('glow-val').innerText = appState.visuals.glowIntensity; document.getElementById('size-val').innerText = appState.visuals.hotspotSize; document.documentElement.style.setProperty('--custom-neon-color', appState.visuals.color); document.documentElement.style.setProperty('--custom-stroke-style', appState.visuals.showBorder ? appState.visuals.strokeStyle : 'none'); document.documentElement.style.setProperty('--custom-glow-intensity', `${appState.visuals.showBorder ? appState.visuals.glowIntensity : 0}px`); document.documentElement.style.setProperty('--custom-border-width', appState.visuals.showBorder ? '3px' : '0px'); document.documentElement.style.setProperty('--custom-hotspot-size', `${appState.visuals.hotspotSize}px`); document.documentElement.style.setProperty('--custom-hotspot-bg', appState.visuals.transparentBg ? 'transparent' : (appState.visuals.showBorder ? 'rgba(0, 243, 255, 0.1)' : 'transparent'));
+        }
+        function updateReflectionSettings(fromDropdown = false) {
+            appState.reflection.color = document.getElementById('ref-color').value; appState.reflection.scale = parseFloat(document.getElementById('ref-scale').value); appState.reflection.rewardImageSize = parseInt(document.getElementById('reward-size').value); document.getElementById('ref-scale-val').innerText = appState.reflection.scale.toFixed(1); document.getElementById('reward-size-val').innerText = appState.reflection.rewardImageSize; document.documentElement.style.setProperty('--ref-color', appState.reflection.color); document.documentElement.style.setProperty('--ref-scale', appState.reflection.scale); appState.reflection.emojis = document.getElementById('ref-emojis').value.split(' ').map(e => e.trim()).filter(e => e.length > 0).slice(0, 5); if(fromDropdown) { const pos = document.getElementById('ref-pos').value.split(','); if(pos[0] !== 'free') { appState.reflection.x = parseFloat(pos[0]); appState.reflection.y = parseFloat(pos[1]); } } renderReflectionPanel();
+        }
+        function renderReflectionPanel() {
+            ['editor-reflection', 'preview-reflection'].forEach(id => {
+                const panel = document.getElementById(id); if (!panel) return; panel.style.left = `${appState.reflection.x}%`; panel.style.top = `${appState.reflection.y}%`; panel.innerHTML = ''; panel.classList.remove('has-selection');
+                appState.reflection.emojis.forEach(emoji => {
+                    const span = document.createElement('span'); span.className = 'emoji-item'; span.innerText = emoji;
+                    if (id === 'preview-reflection') { span.onclick = () => { const sel = span.classList.contains('selected'); panel.querySelectorAll('.emoji-item').forEach(el => el.classList.remove('selected')); if (!sel) { span.classList.add('selected'); panel.classList.add('has-selection'); speakText('Excellent'); } else { panel.classList.remove('has-selection'); } }; }
+                    panel.appendChild(span);
+                });
+                if (appState.reflection.rewardImageBase64) {
+                    const img = document.createElement('img'); img.src = appState.reflection.rewardImageBase64; img.className = 'emoji-item reward-img'; img.style.width = appState.reflection.rewardImageSize + 'px'; img.style.height = appState.reflection.rewardImageSize + 'px';
+                    if (id === 'preview-reflection') { img.onclick = () => { const sel = img.classList.contains('selected'); panel.querySelectorAll('.emoji-item').forEach(el => el.classList.remove('selected')); if (!sel) { img.classList.add('selected'); panel.classList.add('has-selection'); speakText('Great job'); } else { panel.classList.remove('has-selection'); } }; }
+                    panel.appendChild(img);
+                }
+            });
+        }
+
+        // ================= DRAG & DROP =================
+        function initDragAndDrop() {
+            const editorWrap = document.getElementById('editor-canvas-wrap'); const editorCanvas = document.getElementById('editor-canvas');
+            editorWrap.addEventListener('mousedown', (e) => {
+                const hsEl = e.target.closest('.hotspot'); const refEl = e.target.closest('.reflection-panel'); const btnEl = e.target.closest('.mode-btn'); const logoEl = e.target.closest('.custom-logo-overlay');
+                if (hsEl && !e.target.classList.contains('hotspot-delete')) { draggedElement = hsEl; dragType = 'hotspot'; draggedId = hsEl.dataset.id; e.preventDefault(); }
+                else if (refEl) { draggedElement = refEl; dragType = 'reflection'; e.preventDefault(); } else if (logoEl) { draggedElement = logoEl; dragType = 'logo'; e.preventDefault(); } else if (btnEl && appState.buttonStyles.dragEnabled) { draggedElement = btnEl; dragType = 'button'; draggedId = btnEl.dataset.btnType; e.preventDefault(); btnEl.classList.add('dragging'); }
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!draggedElement) return;
+                const rect = editorCanvas.getBoundingClientRect();
+                let xPercent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)); let yPercent = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+                draggedElement.style.left = `${xPercent}%`; draggedElement.style.top = `${yPercent}%`;
+                if (dragType === 'hotspot') { const hs = appState.slides[currentSlideIndex].hotspots.find(h => h.id === draggedId); if (hs) { hs.x = xPercent; hs.y = yPercent; } }
+                else if (dragType === 'reflection') { appState.reflection.x = xPercent; appState.reflection.y = yPercent; document.getElementById('ref-pos').value = 'free'; }
+                else if (dragType === 'logo') { appState.logo.x = xPercent; appState.logo.y = yPercent; document.getElementById('logo-pos-type').value = 'free'; }
+                else if (dragType === 'button') { const btnSet = appState.buttonStyles[draggedId]; btnSet.x = xPercent; btnSet.y = yPercent; btnSet.positionType = 'free'; if(document.getElementById('btn-selector').value === draggedId) loadButtonSettingsToForm(); }
+            });
+            window.addEventListener('mouseup', () => { if (draggedElement) { if (dragType === 'hotspot') renderAllHotspots(); if (dragType === 'button') { draggedElement.classList.remove('dragging'); renderButtons(); } if (dragType === 'reflection') renderReflectionPanel(); if (dragType === 'logo') renderLogo(); draggedElement = null; dragType = null; } });
+        }
+
+        // ================= JSON =================
+        function saveProjectJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "neon_echo_project.json"); document.body.appendChild(a); a.click(); a.remove(); }
+        function loadProjectJSON(event) {
+            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.posterBase64 !== undefined) { parsed.slides = [{ posterBase64: parsed.posterBase64, words: parsed.words || [], sentences: parsed.sentences || [], hotspots: parsed.hotspots || [] }]; delete parsed.posterBase64; delete parsed.words; delete parsed.sentences; delete parsed.hotspots; }
+                    if (!parsed.orientation) parsed.orientation = 'auto'; if (!parsed.posterSize) parsed.posterSize = 100;
+                    if (!parsed.backdrop) parsed.backdrop = { enabled: false, color: '#0d0d15', opacity: 80, padding: 40, radius: 12 };
+                    
+                    Object.assign(appState, parsed);
+                    
+                    document.getElementById('bg-enabled').checked = appState.background.enabled; document.getElementById('bg-color').value = appState.background.color; document.getElementById('bg-padding').value = appState.background.padding; document.getElementById('btn-drag-enabled').checked = appState.buttonStyles.dragEnabled; document.getElementById('proj-orientation').value = appState.orientation;
+                    
+                    document.getElementById('poster-size').value = appState.posterSize; document.getElementById('poster-size-val').innerText = appState.posterSize;
+                    
+                    document.getElementById('bd-enabled').checked = appState.backdrop.enabled;
+                    document.getElementById('bd-color').value = appState.backdrop.color;
+                    document.getElementById('bd-opacity').value = appState.backdrop.opacity;
+                    document.getElementById('bd-padding').value = appState.backdrop.padding;
+                    document.getElementById('bd-radius').value = appState.backdrop.radius;
+
+                    document.getElementById('neon-color').value = appState.visuals.color; document.getElementById('stroke-style').value = appState.visuals.strokeStyle; document.getElementById('glow-intensity').value = appState.visuals.glowIntensity; document.getElementById('hotspot-size').value = appState.visuals.hotspotSize; document.getElementById('show-border').checked = appState.visuals.showBorder; document.getElementById('transparent-hotspot').checked = !!appState.visuals.transparentBg;
+                    document.getElementById('ref-color').value = appState.reflection.color; document.getElementById('ref-scale').value = appState.reflection.scale; if(appState.reflection.rewardImageSize) document.getElementById('reward-size').value = appState.reflection.rewardImageSize; if(appState.reflection.emojis) document.getElementById('ref-emojis').value = appState.reflection.emojis.join(' ');
+                    if (appState.logo) { document.getElementById('logo-enabled').checked = appState.logo.enabled; document.getElementById('logo-type').value = appState.logo.type; document.getElementById('logo-text').value = appState.logo.text || ''; document.getElementById('logo-font').value = appState.logo.font || 'Arial'; document.getElementById('logo-color').value = appState.logo.color || '#00f3ff'; document.getElementById('logo-size').value = appState.logo.size || 24; document.getElementById('logo-url').value = appState.logo.url || ''; }
+                    
+                    switchSlide(0); applyPosterSize(); updateVoiceList(); updateVisualSettings(); updateBackdropSettings(); updateReflectionSettings(); updateLogoSettings(); updateBackgroundDisplay(); loadButtonSettingsToForm(); renderButtons(); showToast("Проект успешно загружен!");
+                } catch (err) { showToast("Ошибка чтения JSON файла!", true); }
+            }; reader.readAsText(file);
+        }
+
+        // ================= ГЕНЕРАЦИЯ HTML ДЛЯ ЭКСПОРТА =================
+        function generateCoreHTML() {
+            let fontLinks = ''; new Set(['word', 'spelling', 'example'].map(t => appState.buttonStyles[t].fontFamily).concat([appState.logo.font])).forEach(f => { if(!['Arial', 'Comic Sans MS', 'Segoe UI', 'Helvetica', 'sans-serif'].includes(f)) fontLinks += `<link href="https://fonts.googleapis.com/css2?family=${f.replace(/\s+/g, '+')}&display=swap" rel="stylesheet">\n    `; });
+            
+            const scale = appState.posterSize / 100;
+            
+            return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Echo // Vocab Trainer</title>
+    ${fontLinks}
+    <style>
+        :root { --custom-neon-color: ${appState.visuals.color}; --custom-stroke-style: ${appState.visuals.showBorder ? appState.visuals.strokeStyle : 'none'}; --custom-glow-intensity: ${appState.visuals.showBorder ? appState.visuals.glowIntensity : 0}px; --custom-border-width: ${appState.visuals.showBorder ? '3px' : '0px'}; --custom-hotspot-size: ${appState.visuals.hotspotSize}px; --custom-hotspot-bg: ${appState.visuals.transparentBg ? 'transparent' : (appState.visuals.showBorder ? 'rgba(0, 243, 255, 0.1)' : 'transparent')}; --ref-color: ${appState.reflection.color}; --ref-scale: ${appState.reflection.scale}; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: transparent; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .workspace { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        
+        .canvas-container { position: relative; width: 100%; height: 100%; user-select: none; display: flex; justify-content: center; align-items: center; ${appState.background.enabled ? `padding: ${appState.background.padding}px; background-color: ${appState.background.color}; background-image: ${appState.background.imageBase64 ? `url(${appState.background.imageBase64})` : 'none'}; background-size: cover; background-position: center;` : `padding: 0; background: transparent;`} }
+        
+        .canvas-container-inner { position: relative; max-width: 100%; max-height: 100%; display: inline-block; padding: ${appState.backdrop.enabled ? appState.backdrop.padding : 0}px; }
+        
+        .poster-backdrop {
+            display: ${appState.backdrop.enabled ? 'block' : 'none'};
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0; pointer-events: none;
+            background-color: ${appState.backdrop.color};
+            opacity: ${appState.backdrop.opacity / 100};
+            border-radius: ${appState.backdrop.radius}px;
+        }
+
+        .canvas-container-inner img { 
+            display: block; 
+            position: relative; z-index: 1;
+            max-width: ${appState.posterSize}%; 
+            max-height: calc((100vh - ${appState.background.enabled ? appState.background.padding*2 : 0}px) * ${scale}); 
+            object-fit: contain; 
+            pointer-events: none; 
+        }
+        
+        ${appState.orientation === 'landscape' ? `.canvas-container-inner { max-width: 100vw; max-height: 56.25vw; } .canvas-container-inner img { max-width: calc(100vw * ${scale}); max-height: calc(56.25vw * ${scale}); }` : ''}
+        ${appState.orientation === 'portrait' ? `.canvas-container-inner { max-height: 100vh; max-width: 56.25vh; } .canvas-container-inner img { max-height: calc(100vh * ${scale}); max-width: calc(56.25vh * ${scale}); }` : ''}
+
+        .slide-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.5); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; border-radius: 50%; user-select: none; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.2); }
+        .slide-nav:hover { background: var(--custom-neon-color); color: #000; box-shadow: 0 0 15px var(--custom-neon-color); border-color: var(--custom-neon-color); transform: translateY(-50%) scale(1.1); }
+        .prev-slide { left: 20px; }
+        .next-slide { right: 20px; }
+
+        .hotspot { position: absolute; width: var(--custom-hotspot-size); height: var(--custom-hotspot-size); transform: translate(-50%, -50%); cursor: pointer; border: var(--custom-border-width) var(--custom-stroke-style) var(--custom-neon-color); border-radius: 12px; background: var(--custom-hotspot-bg); box-shadow: 0 0 var(--custom-glow-intensity) var(--custom-neon-color), inset 0 0 calc(var(--custom-glow-intensity) / 2) var(--custom-neon-color); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; z-index: 5; }
+        .hotspot:hover { transform: translate(-50%, -50%) scale(1.15); background: rgba(0, 243, 255, 0.25); box-shadow: 0 0 calc(var(--custom-glow-intensity) * 1.8) var(--custom-neon-color), inset 0 0 var(--custom-glow-intensity) var(--custom-neon-color); z-index: 10; }
+        .hotspot-label { position: absolute; bottom: -30px; background: rgba(13,13,21,0.95); border: 1px solid var(--custom-neon-color); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; box-shadow: 0 0 5px var(--custom-neon-color); }
+        .hotspot:hover .hotspot-label { opacity: 1; }
+        .reflection-panel { position: absolute; background: rgba(13,13,21,0.85); border: 2px solid var(--ref-color); backdrop-filter: blur(10px); padding: 10px 15px; border-radius: 30px; display: flex; gap: 12px; align-items: center; z-index: 20; box-shadow: 0 0 20px var(--ref-color); transform: translate(-50%, -50%) scale(var(--ref-scale)); left: ${appState.reflection.x}%; top: ${appState.reflection.y}%; }
+        .emoji-item { font-size: 1.6rem; cursor: pointer; transition: all 0.2s; filter: grayscale(40%) opacity(0.7); user-select: none; display: inline-block; }
+        .reward-img { object-fit: contain; vertical-align: middle; width: ${appState.reflection.rewardImageSize}px; height: ${appState.reflection.rewardImageSize}px; }
+        .emoji-item:hover { transform: scale(1.3); filter: grayscale(0%) opacity(1); }
+        .emoji-item.selected { transform: scale(1.4); filter: grayscale(0%) opacity(1); text-shadow: 0 0 15px #ffe600; filter: drop-shadow(0 0 10px #ffe600); }
+        .reflection-panel.has-selection .emoji-item:not(.selected) { filter: grayscale(100%) opacity(0.3); transform: scale(0.9); }
+        .mode-btn { position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; transition: 0.2s; z-index: 15; user-select: none; box-sizing: border-box; transform: translate(-50%, -50%); }
+        .mode-btn.active-mode { box-shadow: 0 0 15px rgba(255,255,255,0.4); filter: brightness(1.2); transform: translate(-50%, -50%) scale(1.05); }
+        .custom-logo-overlay { position: absolute; z-index: 25; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; transition: transform 0.2s, filter 0.2s; }
+        .custom-logo-overlay a { text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .custom-logo-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+        .custom-logo-overlay:hover { filter: drop-shadow(0 0 10px var(--neon-cyan)); transform: translate(-50%, -50%) scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="workspace">
+        <div class="slide-nav prev-slide" id="nav-prev" onclick="changeSlide(-1)" style="display:none;">&#10094;</div>
+        <div class="slide-nav next-slide" id="nav-next" onclick="changeSlide(1)" style="display:none;">&#10095;</div>
+        
+        <div class="canvas-container">
+            <div class="canvas-container-inner" id="canvas">
+                <div class="poster-backdrop" id="backdrop"></div>
+                <img id="canvas-img" src="${appState.slides[0].posterBase64}" alt="Poster">
+                <div class="reflection-panel" id="reflection"></div>
+                <div class="mode-btn active-mode" id="btn-word" onclick="setMode('word')"></div>
+                <div class="mode-btn" id="btn-spelling" onclick="setMode('spelling')"></div>
+                <div class="mode-btn" id="btn-example" onclick="setMode('example')"></div>
+                <div class="custom-logo-overlay" id="logo-overlay" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const state = ${JSON.stringify(appState)};
+        let activeMode = 'word'; let voices = []; let currentSlideIdx = 0;
+        window.onload = () => { initAudio(); renderButtons(); renderLogo(); renderReflection(); setupSlides(); renderCurrentSlide(); };
+        function initAudio() { if ('speechSynthesis' in window) { voices = window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { voices = window.speechSynthesis.getVoices(); }; } }
+        function setMode(mode) { activeMode = mode; ['word', 'spelling', 'example'].forEach(m => { const el = document.getElementById('btn-'+m); if(el) el.classList.remove('active-mode'); }); const activeBtn = document.getElementById('btn-'+mode); if(activeBtn) activeBtn.classList.add('active-mode'); }
+        function speak(text, isSpelling = false) {
+            if (!('speechSynthesis' in window) || !text) return; window.speechSynthesis.cancel();
+            if (isSpelling) { text.replace(/[^a-zA-Zа-яА-Я0-9]/g, '').split('').forEach(l => { const u = new SpeechSynthesisUtterance(l); applyVoice(u); u.rate = Math.max(0.6, state.audio.rate * 0.85); window.speechSynthesis.speak(u); }); }
+            else { const u = new SpeechSynthesisUtterance(text); applyVoice(u); window.speechSynthesis.speak(u); }
+        }
+        function applyVoice(u) { u.lang = state.audio.lang; u.rate = state.audio.rate; u.pitch = state.audio.pitch; if (state.audio.voiceURI) { const v = voices.find(val => val.voiceURI === state.audio.voiceURI); if (v) u.voice = v; } }
+        
+        function setupSlides() {
+            if (state.slides.length > 1) {
+                document.getElementById('nav-prev').style.display = 'flex';
+                document.getElementById('nav-next').style.display = 'flex';
+            }
+        }
+        function changeSlide(dir) {
+            currentSlideIdx += dir;
+            if (currentSlideIdx < 0) currentSlideIdx = state.slides.length - 1;
+            if (currentSlideIdx >= state.slides.length) currentSlideIdx = 0;
+            renderCurrentSlide();
+        }
+        
+        function renderCurrentSlide() {
+            const slide = state.slides[currentSlideIdx];
+            document.getElementById('canvas-img').src = slide.posterBase64 || '';
+            document.querySelectorAll('.hotspot').forEach(el => el.remove());
+            const canvas = document.getElementById('canvas');
+            
+            slide.hotspots.forEach(hs => {
+                const word = slide.words[hs.wordIndex] || 'Word #' + (hs.wordIndex + 1); const sentence = slide.sentences[hs.wordIndex];
+                const div = document.createElement('div'); div.className = 'hotspot'; div.style.left = hs.x + '%'; div.style.top = hs.y + '%';
+                div.innerHTML = '<span class="hotspot-label">' + word + '</span>';
+                div.onclick = () => { if (activeMode === 'word') speak(word); else if (activeMode === 'spelling') speak(word, true); else if (activeMode === 'example') speak(sentence || word); };
+                canvas.appendChild(div);
+            });
+            // Сохраняем UI поверх маркеров
+            canvas.appendChild(document.getElementById('reflection'));
+            canvas.appendChild(document.getElementById('btn-word'));
+            canvas.appendChild(document.getElementById('btn-spelling'));
+            canvas.appendChild(document.getElementById('btn-example'));
+            canvas.appendChild(document.getElementById('logo-overlay'));
+        }
+        
+        function renderReflection() {
+            const panel = document.getElementById('reflection');
+            state.reflection.emojis.forEach(e => {
+                const span = document.createElement('span'); span.className = 'emoji-item'; span.innerText = e;
+                span.onclick = () => { const sel = span.classList.contains('selected'); panel.querySelectorAll('.emoji-item').forEach(el => el.classList.remove('selected')); if (!sel) { span.classList.add('selected'); panel.classList.add('has-selection'); speak('Excellent'); } else { panel.classList.remove('has-selection'); } };
+                panel.appendChild(span);
+            });
+            if (state.reflection.rewardImageBase64) {
+                const img = document.createElement('img'); img.src = state.reflection.rewardImageBase64; img.className = 'emoji-item reward-img';
+                img.onclick = () => { const sel = img.classList.contains('selected'); panel.querySelectorAll('.emoji-item').forEach(el => el.classList.remove('selected')); if (!sel) { img.classList.add('selected'); panel.classList.add('has-selection'); speak('Great job'); } else { panel.classList.remove('has-selection'); } };
+                panel.appendChild(img);
+            }
+        }
+        function renderButtons() {
+            ['word', 'spelling', 'example'].forEach(type => {
+                const btn = document.getElementById('btn-'+type); const s = state.buttonStyles[type];
+                if (!btn) return;
+                if (s.show === false) {
+                    btn.style.display = 'none';
+                } else {
+                    btn.style.display = 'flex';
+                    btn.innerText = s.text; btn.style.fontFamily = '"'+s.fontFamily+'", sans-serif'; btn.style.fontSize = s.fontSize+'px'; btn.style.color = s.textColor; btn.style.backgroundColor = s.bgColor; btn.style.border = s.borderWidth+'px '+s.borderStyle+' '+s.borderColor; btn.style.borderRadius = s.borderRadius+'px'; btn.style.width = s.width || 'auto'; btn.style.height = s.height || 'auto'; btn.style.left = s.x+'%'; btn.style.top = s.y+'%';
+                }
+            });
+        }
+        function renderLogo() {
+            const el = document.getElementById('logo-overlay');
+            if (!state.logo || !state.logo.enabled) { el.style.display = 'none'; return; }
+            el.style.display = 'flex'; el.style.left = state.logo.x + '%'; el.style.top = state.logo.y + '%';
+            let content = '';
+            if (state.logo.type === 'text') {
+                content = '<span style="font-family: \\'' + state.logo.font + '\\', sans-serif; font-size: ' + state.logo.size + 'px; color: ' + state.logo.color + '; text-shadow: 0 0 8px rgba(0,0,0,0.8); font-weight: 800; letter-spacing: 1px; white-space: nowrap;">' + (state.logo.text || 'LOGO') + '</span>';
+            } else if (state.logo.imageBase64) {
+                content = '<img src="' + state.logo.imageBase64 + '" style="height: ' + state.logo.size + 'px; width: auto; object-fit: contain; display: block;" alt="Logo">';
+            }
+            if (state.logo.url) { el.innerHTML = '<a href="' + state.logo.url + '" target="_blank" onclick="event.stopPropagation();">' + content + '</a>'; }
+            else { el.innerHTML = content; }
+        }
+    <\/script>
+</body>
+</html>`;
+        }
+
+        function exportStandaloneHTML() {
+            if (!appState.slides[0].posterBase64) { showToast("Загрузите хотя бы один постер!", true); return; }
+            const htmlContent = generateCoreHTML();
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const downloadAnchor = document.createElement('a'); downloadAnchor.href = URL.createObjectURL(blob); downloadAnchor.download = "neon_trainer_series.html";
+            document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
+        }
+
+        function generateGeniallyIframe() {
+            if (!appState.slides[0].posterBase64) { showToast("Загрузите хотя бы один постер!", true); return; }
+            const htmlContent = generateCoreHTML();
+            const escapedHtml = htmlContent.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+            const iframeCode = `<iframe srcdoc="${escapedHtml}" width="100%" height="100%" style="width: 100%; height: 100%; border: none; max-width: 100%; max-height: 100%;" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe>`;
+            
+            document.getElementById('genially-div-code').value = iframeCode;
+            document.getElementById('div-code-container').style.display = 'block';
+            showToast("Iframe-код сгенерирован!");
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function copyToClipboard(id) { const el = document.getElementById(id); el.select(); document.execCommand('copy'); showToast("Скопировано!"); }
+        function showToast(msg, err = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? '#ff003c' : 'var(--neon-cyan)'; t.style.color = err ? '#fff' : '#000'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    </script>
+</body>
+</html>
