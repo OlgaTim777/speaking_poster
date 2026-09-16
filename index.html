@@ -95,13 +95,18 @@
             transition: padding 0.3s, background 0.3s; 
             background-size: cover; background-position: center; 
         }
-        
-        .canvas-container-inner { 
+
+        /* НОВАЯ ОБЕРТКА ДЛЯ ПОДЛОЖКИ */
+        .canvas-container-padded { 
             position: relative; display: inline-block; 
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            user-select: none; 
             transition: padding 0.3s;
+        }
+        
+        .canvas-container-inner { 
+            position: relative; display: inline-block; 
+            user-select: none; 
         }
 
         .poster-backdrop {
@@ -488,6 +493,7 @@
                                         <option value="10,10">Сверху слева</option>
                                         <option value="90,10">Сверху справа</option>
                                         <option value="50,10">Сверху по центру</option>
+                                        <option value="50,50">Строго по центру экрана</option>
                                         <option value="10,90">Снизу слева</option>
                                         <option value="90,90">Снизу справа</option>
                                         <option value="free">Свободная (Drag & Drop)</option>
@@ -534,14 +540,18 @@
                 </div>
                 
                 <div class="canvas-container" id="editor-canvas-wrap" style="display: none;">
-                    <div class="canvas-container-inner" id="editor-canvas" onclick="handleCanvasClick(event)">
+                    <!-- Обертка для отступов -->
+                    <div class="canvas-container-padded" id="editor-canvas-padded">
                         <div class="poster-backdrop" id="editor-backdrop-layer" style="display:none;"></div>
-                        <img id="editor-img" src="" alt="Poster">
-                        <div class="reflection-panel" id="editor-reflection"></div>
-                        <div class="mode-btn" id="editor-btn-word" data-btn-type="word" onclick="handleBtnEditorClick('word', event)"></div>
-                        <div class="mode-btn" id="editor-btn-spelling" data-btn-type="spelling" onclick="handleBtnEditorClick('spelling', event)"></div>
-                        <div class="mode-btn" id="editor-btn-example" data-btn-type="example" onclick="handleBtnEditorClick('example', event)"></div>
-                        <div class="custom-logo-overlay" id="editor-logo" style="display: none;"></div>
+                        <!-- Внутренний холст строго по размеру картинки -->
+                        <div class="canvas-container-inner" id="editor-canvas" onclick="handleCanvasClick(event)">
+                            <img id="editor-img" src="" alt="Poster">
+                            <div class="reflection-panel" id="editor-reflection"></div>
+                            <div class="mode-btn" id="editor-btn-word" data-btn-type="word" onclick="handleBtnEditorClick('word', event)"></div>
+                            <div class="mode-btn" id="editor-btn-spelling" data-btn-type="spelling" onclick="handleBtnEditorClick('spelling', event)"></div>
+                            <div class="mode-btn" id="editor-btn-example" data-btn-type="example" onclick="handleBtnEditorClick('example', event)"></div>
+                            <div class="custom-logo-overlay" id="editor-logo" style="display: none;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -554,14 +564,16 @@
                 <div class="slide-nav next-slide" id="preview-next" onclick="changePreviewSlide(1)" style="display:none;">&#10095;</div>
 
                 <div class="canvas-container" id="preview-canvas-wrap" style="display: none;">
-                    <div class="canvas-container-inner" id="preview-canvas">
+                    <div class="canvas-container-padded" id="preview-canvas-padded">
                         <div class="poster-backdrop" id="preview-backdrop-layer" style="display:none;"></div>
-                        <img id="preview-img" src="" alt="Poster Preview">
-                        <div class="reflection-panel" id="preview-reflection"></div>
-                        <div class="mode-btn active-mode" id="preview-btn-word" onclick="setSpeechMode('word')"></div>
-                        <div class="mode-btn" id="preview-btn-spelling" onclick="setSpeechMode('spelling')"></div>
-                        <div class="mode-btn" id="preview-btn-example" onclick="setSpeechMode('example')"></div>
-                        <div class="custom-logo-overlay" id="preview-logo" style="display: none;"></div>
+                        <div class="canvas-container-inner" id="preview-canvas">
+                            <img id="preview-img" src="" alt="Poster Preview">
+                            <div class="reflection-panel" id="preview-reflection"></div>
+                            <div class="mode-btn active-mode" id="preview-btn-word" onclick="setSpeechMode('word')"></div>
+                            <div class="mode-btn" id="preview-btn-spelling" onclick="setSpeechMode('spelling')"></div>
+                            <div class="mode-btn" id="preview-btn-example" onclick="setSpeechMode('example')"></div>
+                            <div class="custom-logo-overlay" id="preview-logo" style="display: none;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -673,19 +685,21 @@
 
         function applyBackdrop() {
             ['editor', 'preview'].forEach(prefix => {
-                const inner = document.getElementById(`${prefix}-canvas`);
+                const padded = document.getElementById(`${prefix}-canvas-padded`);
                 const bdLayer = document.getElementById(`${prefix}-backdrop-layer`);
-                if(!inner || !bdLayer) return;
+                if(!padded || !bdLayer) return;
 
                 if (appState.backdrop.enabled) {
-                    inner.style.padding = `${appState.backdrop.padding}px`;
+                    padded.style.padding = `${appState.backdrop.padding}px`;
                     bdLayer.style.display = 'block';
                     bdLayer.style.backgroundColor = appState.backdrop.color;
                     bdLayer.style.opacity = appState.backdrop.opacity / 100;
                     bdLayer.style.borderRadius = `${appState.backdrop.radius}px`;
+                    padded.style.borderRadius = `${appState.backdrop.radius}px`;
                 } else {
-                    inner.style.padding = '0px';
+                    padded.style.padding = '0px';
                     bdLayer.style.display = 'none';
+                    padded.style.borderRadius = '0px';
                 }
             });
         }
@@ -910,7 +924,7 @@
             settings.borderWidth = parseInt(document.getElementById('btn-border-width').value); 
             settings.borderRadius = parseInt(document.getElementById('btn-border-radius').value); 
             document.getElementById('btn-border-width-val').innerText = settings.borderWidth; document.getElementById('btn-border-radius-val').innerText = settings.borderRadius; settings.positionType = document.getElementById('btn-position-type').value; const isFree = settings.positionType === 'free'; document.getElementById('btn-coords-inputs').style.display = isFree ? 'flex' : 'none';
-            if (updateCoords && !isFree) { switch(settings.positionType) { case 'top-center': settings.x=50; settings.y=5; break; case 'top-left': settings.x=10; settings.y=5; break; case 'top-right': settings.x=90; settings.y=5; break; case 'bottom-center': settings.x=50; settings.y=95; break; case 'bottom-left': settings.x=10; settings.y=95; break; case 'bottom-right': settings.x=90; settings.y=95; break; } document.getElementById('btn-x').value = settings.x; document.getElementById('btn-y').value = settings.y; } else if (isFree) { settings.x = parseFloat(document.getElementById('btn-x').value); settings.y = parseFloat(document.getElementById('btn-y').value); }
+            if (updateCoords && !isFree) { switch(settings.positionType) { case 'top-center': settings.x=50; settings.y=5; break; case 'top-left': settings.x=10; settings.y=5; break; case 'top-right': settings.x=90; settings.y=5; break; case 'bottom-center': settings.x=50; settings.y=95; break; case 'bottom-left': settings.x=10; settings.y=95; break; case 'bottom-right': settings.x=90; settings.y=95; break; case '50,50': settings.x=50; settings.y=50; break; } document.getElementById('btn-x').value = settings.x; document.getElementById('btn-y').value = settings.y; } else if (isFree) { settings.x = parseFloat(document.getElementById('btn-x').value); settings.y = parseFloat(document.getElementById('btn-y').value); }
             loadGoogleFont(settings.fontFamily); renderButtons();
         }
         
@@ -999,7 +1013,11 @@
             window.addEventListener('mousemove', (e) => {
                 if (!draggedElement) return;
                 const rect = editorCanvas.getBoundingClientRect();
-                let xPercent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)); let yPercent = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+                
+                // Сняты жесткие ограничения Math.max, чтобы элементы можно было выносить на подложку
+                let xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+                let yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+                
                 draggedElement.style.left = `${xPercent}%`; draggedElement.style.top = `${yPercent}%`;
                 if (dragType === 'hotspot') { const hs = appState.slides[currentSlideIndex].hotspots.find(h => h.id === draggedId); if (hs) { hs.x = xPercent; hs.y = yPercent; } }
                 else if (dragType === 'reflection') { appState.reflection.x = xPercent; appState.reflection.y = yPercent; document.getElementById('ref-pos').value = 'free'; }
@@ -1062,8 +1080,9 @@
         
         .canvas-container { position: relative; width: 100%; height: 100%; user-select: none; display: flex; justify-content: center; align-items: center; ${appState.background.enabled ? `padding: ${appState.background.padding}px; background-color: ${appState.background.color}; background-image: ${appState.background.imageBase64 ? `url(${appState.background.imageBase64})` : 'none'}; background-size: cover; background-position: center;` : `padding: 0; background: transparent;`} }
         
-        .canvas-container-inner { position: relative; max-width: 100%; max-height: 100%; display: inline-block; padding: ${appState.backdrop.enabled ? appState.backdrop.padding : 0}px; }
-        
+        .canvas-container-padded { position: relative; max-width: 100%; max-height: 100%; display: inline-block; padding: ${appState.backdrop.enabled ? appState.backdrop.padding : 0}px; border-radius: ${appState.backdrop.enabled ? appState.backdrop.radius : 0}px; box-sizing: border-box; }
+        .canvas-container-inner { position: relative; max-width: 100%; max-height: 100%; display: block; }
+
         .poster-backdrop {
             display: ${appState.backdrop.enabled ? 'block' : 'none'};
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -1082,8 +1101,8 @@
             pointer-events: none; 
         }
         
-        ${appState.orientation === 'landscape' ? `.canvas-container-inner { max-width: 100vw; max-height: 56.25vw; } .canvas-container-inner img { max-width: calc(100vw * ${scale}); max-height: calc(56.25vw * ${scale}); }` : ''}
-        ${appState.orientation === 'portrait' ? `.canvas-container-inner { max-height: 100vh; max-width: 56.25vh; } .canvas-container-inner img { max-height: calc(100vh * ${scale}); max-width: calc(56.25vh * ${scale}); }` : ''}
+        ${appState.orientation === 'landscape' ? `.canvas-container-padded { max-width: 100vw; max-height: 56.25vw; } .canvas-container-inner img { max-width: calc(100vw * ${scale}); max-height: calc(56.25vw * ${scale}); }` : ''}
+        ${appState.orientation === 'portrait' ? `.canvas-container-padded { max-height: 100vh; max-width: 56.25vh; } .canvas-container-inner img { max-height: calc(100vh * ${scale}); max-width: calc(56.25vh * ${scale}); }` : ''}
 
         .slide-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.5); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; border-radius: 50%; user-select: none; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.2); }
         .slide-nav:hover { background: var(--custom-neon-color); color: #000; box-shadow: 0 0 15px var(--custom-neon-color); border-color: var(--custom-neon-color); transform: translateY(-50%) scale(1.1); }
@@ -1114,14 +1133,18 @@
         <div class="slide-nav next-slide" id="nav-next" onclick="changeSlide(1)" style="display:none;">&#10095;</div>
         
         <div class="canvas-container">
-            <div class="canvas-container-inner" id="canvas">
+            <!-- Обертка для отступов в готовом файле -->
+            <div class="canvas-container-padded" id="canvas-padded">
                 <div class="poster-backdrop" id="backdrop"></div>
-                <img id="canvas-img" src="${appState.slides[0].posterBase64}" alt="Poster">
-                <div class="reflection-panel" id="reflection"></div>
-                <div class="mode-btn active-mode" id="btn-word" onclick="setMode('word')"></div>
-                <div class="mode-btn" id="btn-spelling" onclick="setMode('spelling')"></div>
-                <div class="mode-btn" id="btn-example" onclick="setMode('example')"></div>
-                <div class="custom-logo-overlay" id="logo-overlay" style="display: none;"></div>
+                <!-- Холст строго по размеру постера -->
+                <div class="canvas-container-inner" id="canvas">
+                    <img id="canvas-img" src="${appState.slides[0].posterBase64}" alt="Poster">
+                    <div class="reflection-panel" id="reflection"></div>
+                    <div class="mode-btn active-mode" id="btn-word" onclick="setMode('word')"></div>
+                    <div class="mode-btn" id="btn-spelling" onclick="setMode('spelling')"></div>
+                    <div class="mode-btn" id="btn-example" onclick="setMode('example')"></div>
+                    <div class="custom-logo-overlay" id="logo-overlay" style="display: none;"></div>
+                </div>
             </div>
         </div>
     </div>
