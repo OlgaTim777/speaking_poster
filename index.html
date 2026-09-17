@@ -122,6 +122,7 @@
             position: relative; z-index: 1;
             width: auto;
             height: auto;
+            /* Рассчитываем точные размеры, чтобы рамка всегда обтягивала изображение без пустых полей */
             max-width: calc((100vw - 450px) * var(--poster-scale, 1)); 
             max-height: calc((100vh - 140px) * var(--poster-scale, 1)); 
             pointer-events: none; 
@@ -129,6 +130,7 @@
 
         #preview-section .canvas-container-inner img {
             max-width: calc(100vw * var(--poster-scale, 1)); 
+            max-height: calc((100vh - 70px) * var(--poster-scale, 1)); /* Добавлено ограничение для превью */
         }
 
         .empty-state { text-align: center; color: var(--text-muted); border: 2px dashed var(--border-color); padding: 50px; border-radius: 12px; background: var(--bg-glass); z-index: 500; margin: auto;}
@@ -173,9 +175,8 @@
         .reflection-panel.has-selection .emoji-item:not(.selected) { filter: grayscale(100%) opacity(0.3); transform: scale(0.9); }
         
         /* --- TEXT PANEL --- */
-        /* ИСПРАВЛЕНИЕ: max-width: none (убрано ограничение сужения окна) */
-        .text-panel-container { position: absolute; z-index: 30; padding: 15px 20px; border: 2px solid ${appState.textPanel.borderColor}; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.8); transform: translate(-50%, -50%); max-width: none; pointer-events: auto; display: none; background: ${appState.textPanel.bgColor}; left: ${appState.textPanel.x}%; top: ${appState.textPanel.y}%; font-family: '${appState.textPanel.fontFamily}', sans-serif; font-size: ${appState.textPanel.fontSize}px; color: ${appState.textPanel.textColor}; width: ${appState.textPanel.width === 'auto' || appState.textPanel.width === '' ? 'max-content' : appState.textPanel.width}; height: ${appState.textPanel.height}; text-align: ${appState.textPanel.textAlign}; overflow-y: auto; box-sizing: border-box; }
-        .text-panel-sentence { margin-bottom: 8px; transition: all 0.3s ease; line-height: ${appState.textPanel.lineHeight}; }
+        .text-panel-container { position: absolute; z-index: 30; padding: 15px 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.8); transform: translate(-50%, -50%); max-width: none; pointer-events: auto; display: none; overflow-y: auto; box-sizing: border-box; }
+        .text-panel-sentence { margin-bottom: 8px; transition: all 0.3s ease; }
         .text-panel-sentence:last-child { margin-bottom: 0; }
         .editor-mode-active .text-panel-container { cursor: move; outline: 2px dashed rgba(255,255,255,0.4); outline-offset: 4px; }
 
@@ -578,7 +579,7 @@
                                     <option value="portrait">Книжная (9:16, вертикально)</option>
                                 </select>
                             </div>
-                            <p style="font-size: 0.75rem; color: var(--neon-pink); margin-top: 5px;">Для Genially обязательно выберите <b>"Альбомная (16:9)"</b>. Настройки применятся при экспорте.</p>
+                            <p style="font-size: 0.75rem; color: var(--neon-pink); margin-top: 5px;">Настройки применятся при экспорте.</p>
                         </div>
 
                         <div class="sidebar-section">
@@ -596,7 +597,7 @@
                 </div>
             </div>
 
-            <!-- ИДЕАЛЬНАЯ ВЕРСИЯ КАНВАСА -->
+            <!-- ИДЕАЛЬНАЯ ВЕРСИЯ КАНВАСА ИЗ ВЕРСИИ 7 (С РАБОТАЮЩИМ СКРОЛЛОМ) -->
             <div class="workspace" id="editor-workspace">
                 <div class="empty-state" id="editor-empty">
                     <h2>Постер не загружен</h2>
@@ -618,7 +619,7 @@
                             <div class="custom-logo-overlay" id="editor-logo" style="display: none;"></div>
                         </div>
                     </div>
-                    <!-- ИСПРАВЛЕНИЕ: Окно текста прикреплено ко всему фону -->
+                    <!-- Окно текста прикреплено ко всему фону -->
                     <div class="text-panel-container" id="editor-text-panel"></div>
                 </div>
             </div>
@@ -643,7 +644,7 @@
                             <div class="custom-logo-overlay" id="preview-logo" style="display: none;"></div>
                         </div>
                     </div>
-                    <!-- ИСПРАВЛЕНИЕ: Окно текста прикреплено ко всему фону -->
+                    <!-- Окно текста прикреплено ко всему фону -->
                     <div class="text-panel-container" id="preview-text-panel"></div>
                 </div>
             </div>
@@ -668,7 +669,7 @@
                     <h3 style="color: var(--neon-pink); margin-bottom: 8px;">2. Genially Embed: Iframe-формат (Рекомендуется)</h3>
                     <div class="instructions-box">
                         Вставьте этот код в блок <b>"Вставка -> Инородный код (Iframe)"</b> в Genially. 
-                        <b>ИСПРАВЛЕНО:</b> Код возвращен к эталону версии 7. Масштабирование гарантированно будет точным и правильным!
+                        <b>ИСПРАВЛЕНО:</b> Изображение будет идеально вписано в любую высоту окна Genially без обрезания!
                     </div>
                     <button class="btn btn-secondary" style="width: auto; margin-bottom: 10px;" onclick="generateGeniallyIframe()">⚙️ Сгенерировать Iframe для Genially</button>
                     <div id="div-code-container" style="display: none;">
@@ -742,7 +743,7 @@
             initDragAndDrop();
         });
 
-        // ================= ТЕКСТОВАЯ ПАНЕЛЬ (ИСПРАВЛЕНИЯ РАЗМЕРОВ) =================
+        // ================= ТЕКСТОВАЯ ПАНЕЛЬ =================
         function formatSize(val) {
             val = val.trim();
             if (!val || val === 'auto') return 'auto';
@@ -1199,7 +1200,7 @@
             });
         }
 
-        // ================= DRAG & DROP И ИСПРАВЛЕНИЕ ЗА КРАЯМИ =================
+        // ================= DRAG & DROP =================
         function initDragAndDrop() {
             const editorWrap = document.getElementById('editor-canvas-wrap'); const editorCanvas = document.getElementById('editor-canvas');
             editorWrap.addEventListener('mousedown', (e) => {
@@ -1223,12 +1224,9 @@
                     const fieldRect = fieldContainer.getBoundingClientRect();
                     const elRect = draggedElement.getBoundingClientRect();
                     
-                    // Переводим границы поля в координаты относительно левого верхнего угла постера (rect)
-                    // Добавляем 10px отступа (margin), чтобы окно не "прилипало" слишком сильно
                     let minXPx = (fieldRect.left - rect.left) + (elRect.width / 2) + 10;
                     let maxXPx = (fieldRect.right - rect.left) - (elRect.width / 2) - 10;
                     
-                    // Если окно больше самого поля, центрируем его
                     if (minXPx > maxXPx) { 
                         let centerPx = (fieldRect.left - rect.left) + (fieldRect.width / 2); 
                         minXPx = centerPx; maxXPx = centerPx; 
@@ -1244,7 +1242,6 @@
                     let xPx = e.clientX - rect.left;
                     let yPx = e.clientY - rect.top;
                     
-                    // Жесткая фиксация: координаты мыши не могут выйти за рамки
                     xPx = Math.max(minXPx, Math.min(maxXPx, xPx));
                     yPx = Math.max(minYPx, Math.min(maxYPx, yPx));
                     
@@ -1317,6 +1314,7 @@
             let fontLinks = ''; new Set(['word', 'spelling', 'example', 'textBtn'].map(t => appState.buttonStyles[t].fontFamily).concat([appState.logo.font, appState.textPanel.fontFamily])).forEach(f => { if(!['Arial', 'Comic Sans MS', 'Segoe UI', 'Helvetica', 'sans-serif'].includes(f)) fontLinks += `<link href="https://fonts.googleapis.com/css2?family=${f.replace(/\s+/g, '+')}&display=swap" rel="stylesheet">\n    `; });
             
             const scale = appState.posterSize / 100;
+            const totalPad = (appState.background.enabled ? appState.background.padding * 2 : 0) + (appState.backdrop.enabled ? appState.backdrop.padding * 2 : 0);
             
             return `<!DOCTYPE html>
 <html lang="ru">
@@ -1328,13 +1326,14 @@
     <style>
         :root { --custom-neon-color: ${appState.visuals.color}; --custom-stroke-style: ${appState.visuals.showBorder ? appState.visuals.strokeStyle : 'none'}; --custom-glow-intensity: ${appState.visuals.showBorder ? appState.visuals.glowIntensity : 0}px; --custom-border-width: ${appState.visuals.showBorder ? '3px' : '0px'}; --custom-hotspot-size: ${appState.visuals.hotspotSize}px; --custom-hotspot-bg: ${appState.visuals.transparentBg ? 'transparent' : (appState.visuals.showBorder ? 'rgba(0, 243, 255, 0.1)' : 'transparent')}; --ref-color: ${appState.reflection.color}; --ref-scale: ${appState.reflection.scale}; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: transparent; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; overflow: auto; }
-        .workspace { position: relative; min-width: 100vw; min-height: 100vh; display: flex; overflow: auto; }
+        html, body { width: 100%; height: 100%; overflow: auto; margin: 0; padding: 0; }
+        body { background: transparent; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; }
+        .workspace { position: relative; min-width: 100%; min-height: 100%; display: flex; overflow: auto; margin: auto; }
         
         .canvas-container { position: relative; min-width: 100%; min-height: 100%; width: max-content; height: max-content; margin: auto; user-select: none; display: flex; justify-content: center; align-items: center; ${appState.background.enabled ? `padding: ${appState.background.padding}px; background-color: ${appState.background.color}; background-image: ${appState.background.imageBase64 ? `url(${appState.background.imageBase64})` : 'none'}; background-size: cover; background-position: center;` : `padding: 0; background: transparent;`} }
         
-        .canvas-container-padded { position: relative; max-width: 100%; max-height: 100%; display: inline-block; padding: ${appState.backdrop.enabled ? appState.backdrop.padding : 0}px; border-radius: ${appState.backdrop.enabled ? appState.backdrop.radius : 0}px; box-sizing: border-box; }
-        .canvas-container-inner { position: relative; max-width: 100%; max-height: 100%; display: block; }
+        .canvas-container-padded { position: relative; display: inline-block; padding: ${appState.backdrop.enabled ? appState.backdrop.padding : 0}px; border-radius: ${appState.backdrop.enabled ? appState.backdrop.radius : 0}px; box-sizing: border-box; }
+        .canvas-container-inner { position: relative; display: inline-block; }
 
         .poster-backdrop {
             display: ${appState.backdrop.enabled ? 'block' : 'none'};
@@ -1350,13 +1349,11 @@
             position: relative; z-index: 1;
             width: auto;
             height: auto;
-            max-width: calc(100vw * ${scale}); 
-            max-height: calc((100vh - ${appState.background.enabled ? appState.background.padding*2 : 0}px) * ${scale}); 
+            /* Идеальное масштабирование под окно Genially без обрезания низа */
+            max-width: calc((100vw - ${totalPad}px) * ${scale}); 
+            max-height: calc((100vh - ${totalPad}px) * ${scale}); 
             pointer-events: none; 
         }
-        
-        ${appState.orientation === 'landscape' ? `.canvas-container-padded { max-width: 100vw; max-height: 56.25vw; } .canvas-container-inner img { max-width: calc(100vw * ${scale}); max-height: calc(56.25vw * ${scale}); }` : ''}
-        ${appState.orientation === 'portrait' ? `.canvas-container-padded { max-height: 100vh; max-width: 56.25vh; } .canvas-container-inner img { max-height: calc(100vh * ${scale}); max-width: calc(56.25vh * ${scale}); }` : ''}
 
         .slide-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.5); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; border-radius: 50%; user-select: none; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.2); }
         .slide-nav:hover { background: var(--custom-neon-color); color: #000; box-shadow: 0 0 15px var(--custom-neon-color); border-color: var(--custom-neon-color); transform: translateY(-50%) scale(1.1); }
