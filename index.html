@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON ECHO // Synthwave Vocab Editor PRO v11 (Backdrop & Buttons)</title>
+    <title>NEON ECHO // Synthwave Vocab Editor PRO v11 (Text Panel & Buttons)</title>
     <style>
         :root {
             --bg-dark: #0d0d15;
@@ -116,12 +116,19 @@
             transition: all 0.3s;
         }
         
+        /* ИСПРАВЛЕННЫЙ CSS ДЛЯ КАРТИНКИ */
         .canvas-container-inner img { 
             display: block; 
-            position: relative; z-index: 1; /* Поверх подложки */
-            max-width: calc(100% * var(--poster-scale, 1)); 
+            position: relative; z-index: 1;
+            width: auto;
+            height: auto;
+            max-width: calc((100vw - 450px) * var(--poster-scale, 1)); 
             max-height: calc((100vh - 140px) * var(--poster-scale, 1)); 
-            object-fit: contain; pointer-events: none; 
+            pointer-events: none; 
+        }
+
+        #preview-section .canvas-container-inner img {
+            max-width: calc(100vw * var(--poster-scale, 1)); 
         }
 
         .empty-state { text-align: center; color: var(--text-muted); border: 2px dashed var(--border-color); padding: 50px; border-radius: 12px; background: var(--bg-glass); z-index: 500; margin: auto;}
@@ -164,6 +171,13 @@
         .emoji-item:hover { transform: scale(1.3); filter: grayscale(0%) opacity(1); }
         .emoji-item.selected { transform: scale(1.4); filter: grayscale(0%) opacity(1); text-shadow: 0 0 15px var(--neon-yellow); filter: drop-shadow(0 0 10px var(--neon-yellow)); }
         .reflection-panel.has-selection .emoji-item:not(.selected) { filter: grayscale(100%) opacity(0.3); transform: scale(0.9); }
+        
+        /* --- TEXT PANEL --- */
+        /* ИСПРАВЛЕНИЕ: max-width: none (убрано ограничение сужения окна) */
+        .text-panel-container { position: absolute; z-index: 30; padding: 15px 20px; border: 2px solid ${appState.textPanel.borderColor}; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.8); transform: translate(-50%, -50%); max-width: none; pointer-events: auto; display: none; background: ${appState.textPanel.bgColor}; left: ${appState.textPanel.x}%; top: ${appState.textPanel.y}%; font-family: '${appState.textPanel.fontFamily}', sans-serif; font-size: ${appState.textPanel.fontSize}px; color: ${appState.textPanel.textColor}; width: ${appState.textPanel.width === 'auto' || appState.textPanel.width === '' ? 'max-content' : appState.textPanel.width}; height: ${appState.textPanel.height}; text-align: ${appState.textPanel.textAlign}; overflow-y: auto; box-sizing: border-box; }
+        .text-panel-sentence { margin-bottom: 8px; transition: all 0.3s ease; line-height: ${appState.textPanel.lineHeight}; }
+        .text-panel-sentence:last-child { margin-bottom: 0; }
+        .editor-mode-active .text-panel-container { cursor: move; outline: 2px dashed rgba(255,255,255,0.4); outline-offset: 4px; }
 
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; }
@@ -287,6 +301,7 @@
                                     <option value="word">📝 Word (Слово)</option>
                                     <option value="spelling">🔤 Spelling (Спеллинг)</option>
                                     <option value="example">💬 Example (Пример)</option>
+                                    <option value="textBtn">📖 Text (Окно текста)</option>
                                 </select>
                             </div>
                             <div id="btn-settings-form" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
@@ -335,7 +350,56 @@
                                     <div><label>Ось Y (%):</label><input type="number" id="btn-y" min="0" max="100" oninput="applyButtonSettings()"></div>
                                 </div>
                             </div>
-                            <button class="btn btn-secondary" style="margin-top: 10px; border-color: #ff007f;" onclick="resetButtonPositions()">🔄 Сбросить позиции</button>
+                            <button class="btn btn-secondary" style="margin-top: 10px; border-color: #ff007f;" onclick="resetButtonPositions()">🔄 Сбросить позиции кнопок</button>
+                        </div>
+                        
+                        <!-- Настройки Окна с текстом -->
+                        <div class="sidebar-section">
+                            <h3>📖 Настройки окна с текстом</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Настройте внешний вид окна с предложениями-примерами.</p>
+                            
+                            <div class="form-group" style="background: rgba(0, 243, 255, 0.1); padding: 8px; border-radius: 6px; border: 1px dashed var(--neon-cyan);">
+                                <label class="checkbox-label" style="color: var(--neon-cyan); font-weight: bold;">
+                                    <input type="checkbox" id="tp-show-editor" onchange="updateTextPanelSettings()"> Отображать окно в редакторе
+                                </label>
+                            </div>
+
+                            <div class="form-row form-group">
+                                <div><label>Ширина (px):</label><input type="text" id="tp-width" placeholder="auto или 300" oninput="updateTextPanelSettings()"></div>
+                                <div><label>Высота (px):</label><input type="text" id="tp-height" placeholder="auto или 200" oninput="updateTextPanelSettings()"></div>
+                            </div>
+
+                            <div class="form-row form-group">
+                                <div>
+                                    <label>Выравнивание:</label>
+                                    <select id="tp-align" onchange="updateTextPanelSettings()">
+                                        <option value="left">Слева</option>
+                                        <option value="center">По центру</option>
+                                        <option value="right">Справа</option>
+                                        <option value="justify">По ширине</option>
+                                    </select>
+                                </div>
+                                <div><label>Интервал (строки):</label><input type="number" id="tp-line-height" min="1" max="3" step="0.1" value="1.4" oninput="updateTextPanelSettings()"></div>
+                            </div>
+
+                            <div class="form-row form-group">
+                                <div>
+                                    <label>Шрифт:</label>
+                                    <select id="tp-font" onchange="updateTextPanelSettings()">
+                                        <option value="Arial">Arial</option><option value="Roboto">Roboto</option><option value="Montserrat">Montserrat</option><option value="Open Sans">Open Sans</option><option value="Playfair Display">Playfair Display</option><option value="Oswald">Oswald</option><option value="Raleway">Raleway</option><option value="Poppins">Poppins</option><option value="Lato">Lato</option><option value="Comic Sans MS">Comic Sans MS</option>
+                                    </select>
+                                </div>
+                                <div><label>Размер (px):</label><input type="number" id="tp-font-size" min="10" max="40" oninput="updateTextPanelSettings()"></div>
+                            </div>
+                            <div class="form-row form-group">
+                                <div><label>Цвет текста:</label><input type="color" id="tp-text-color" onchange="updateTextPanelSettings()"></div>
+                                <div><label>Подсветка:</label><input type="color" id="tp-high-color" onchange="updateTextPanelSettings()"></div>
+                            </div>
+                            <div class="form-row form-group">
+                                <div><label>Фон окна:</label><input type="color" id="tp-bg-color" onchange="updateTextPanelSettings()"></div>
+                                <div><label>Рамка:</label><input type="color" id="tp-border-color" onchange="updateTextPanelSettings()"></div>
+                            </div>
+                            <button class="btn btn-secondary" style="margin-top: 10px; border-color: #00f3ff;" onclick="resetTextPanelPosition()">🔄 Вернуть окно в центр</button>
                         </div>
                     </div>
 
@@ -532,7 +596,7 @@
                 </div>
             </div>
 
-            <!-- ИДЕАЛЬНАЯ ВЕРСИЯ КАНВАСА ИЗ ВЕРСИИ 7 (С РАБОТАЮЩИМ СКРОЛЛОМ) -->
+            <!-- ИДЕАЛЬНАЯ ВЕРСИЯ КАНВАСА -->
             <div class="workspace" id="editor-workspace">
                 <div class="empty-state" id="editor-empty">
                     <h2>Постер не загружен</h2>
@@ -550,9 +614,12 @@
                             <div class="mode-btn" id="editor-btn-word" data-btn-type="word" onclick="handleBtnEditorClick('word', event)"></div>
                             <div class="mode-btn" id="editor-btn-spelling" data-btn-type="spelling" onclick="handleBtnEditorClick('spelling', event)"></div>
                             <div class="mode-btn" id="editor-btn-example" data-btn-type="example" onclick="handleBtnEditorClick('example', event)"></div>
+                            <div class="mode-btn" id="editor-btn-textBtn" data-btn-type="textBtn" onclick="handleBtnEditorClick('textBtn', event)"></div>
                             <div class="custom-logo-overlay" id="editor-logo" style="display: none;"></div>
                         </div>
                     </div>
+                    <!-- ИСПРАВЛЕНИЕ: Окно текста прикреплено ко всему фону -->
+                    <div class="text-panel-container" id="editor-text-panel"></div>
                 </div>
             </div>
         </section>
@@ -572,9 +639,12 @@
                             <div class="mode-btn active-mode" id="preview-btn-word" onclick="setSpeechMode('word')"></div>
                             <div class="mode-btn" id="preview-btn-spelling" onclick="setSpeechMode('spelling')"></div>
                             <div class="mode-btn" id="preview-btn-example" onclick="setSpeechMode('example')"></div>
+                            <div class="mode-btn" id="preview-btn-textBtn" onclick="toggleTextPanel('preview')"></div>
                             <div class="custom-logo-overlay" id="preview-logo" style="display: none;"></div>
                         </div>
                     </div>
+                    <!-- ИСПРАВЛЕНИЕ: Окно текста прикреплено ко всему фону -->
+                    <div class="text-panel-container" id="preview-text-panel"></div>
                 </div>
             </div>
         </section>
@@ -631,8 +701,10 @@
                 dragEnabled: false,
                 word: { ...defaultButtonStyles, text: '📝 Word', x: 30, y: 5 },
                 spelling: { ...defaultButtonStyles, text: '🔤 Spelling', x: 50, y: 5 },
-                example: { ...defaultButtonStyles, text: '💬 Example', x: 70, y: 5 }
+                example: { ...defaultButtonStyles, text: '💬 Example', x: 70, y: 5 },
+                textBtn: { ...defaultButtonStyles, text: '📖 Текст', x: 90, y: 5 }
             },
+            textPanel: { fontFamily: 'Segoe UI', fontSize: 16, textColor: '#f0f4f8', highlightColor: '#ffe600', bgColor: 'rgba(13, 13, 21, 0.9)', borderColor: '#00f3ff', x: 50, y: 50, showInEditor: true, width: 'auto', height: 'auto', textAlign: 'left', lineHeight: 1.4 },
             audio: { lang: 'en-US', voiceURI: null, rate: 1.0, pitch: 1.0 },
             visuals: { color: '#00f3ff', strokeStyle: 'solid', glowIntensity: 15, hotspotSize: 60, showBorder: true, transparentBg: false },
             reflection: { x: 50, y: 90, color: '#9d00ff', scale: 1.0, emojis: ['🔥', '⚡', '🤖', '🚀', '💜'], rewardImageBase64: null, rewardImageSize: 40 },
@@ -651,10 +723,116 @@
             updateBackdropSettings();
             updateReflectionSettings(); 
             updateLogoSettings(); 
+            
+            document.getElementById('tp-show-editor').checked = appState.textPanel.showInEditor;
+            document.getElementById('tp-width').value = appState.textPanel.width.replace('px', '');
+            document.getElementById('tp-height').value = appState.textPanel.height.replace('px', '');
+            document.getElementById('tp-align').value = appState.textPanel.textAlign;
+            document.getElementById('tp-line-height').value = appState.textPanel.lineHeight;
+            document.getElementById('tp-font').value = appState.textPanel.fontFamily;
+            document.getElementById('tp-font-size').value = appState.textPanel.fontSize;
+            document.getElementById('tp-text-color').value = appState.textPanel.textColor;
+            document.getElementById('tp-high-color').value = appState.textPanel.highlightColor;
+            document.getElementById('tp-bg-color').value = appState.textPanel.bgColor;
+            document.getElementById('tp-border-color').value = appState.textPanel.borderColor;
+
             loadButtonSettingsToForm(); 
             renderButtons(); 
+            renderTextPanel();
             initDragAndDrop();
         });
+
+        // ================= ТЕКСТОВАЯ ПАНЕЛЬ (ИСПРАВЛЕНИЯ РАЗМЕРОВ) =================
+        function formatSize(val) {
+            val = val.trim();
+            if (!val || val === 'auto') return 'auto';
+            if (!isNaN(val)) return val + 'px';
+            return val;
+        }
+
+        function updateTextPanelSettings() {
+            appState.textPanel.showInEditor = document.getElementById('tp-show-editor').checked;
+            appState.textPanel.width = formatSize(document.getElementById('tp-width').value);
+            appState.textPanel.height = formatSize(document.getElementById('tp-height').value);
+            appState.textPanel.textAlign = document.getElementById('tp-align').value;
+            appState.textPanel.lineHeight = parseFloat(document.getElementById('tp-line-height').value) || 1.4;
+            appState.textPanel.fontFamily = document.getElementById('tp-font').value;
+            appState.textPanel.fontSize = parseInt(document.getElementById('tp-font-size').value);
+            appState.textPanel.textColor = document.getElementById('tp-text-color').value;
+            appState.textPanel.highlightColor = document.getElementById('tp-high-color').value;
+            appState.textPanel.bgColor = document.getElementById('tp-bg-color').value;
+            appState.textPanel.borderColor = document.getElementById('tp-border-color').value;
+            
+            loadGoogleFont(appState.textPanel.fontFamily);
+            renderTextPanel();
+        }
+
+        function renderTextPanel() {
+            ['editor', 'preview'].forEach(prefix => {
+                const panel = document.getElementById(`${prefix}-text-panel`);
+                if (!panel) return;
+                
+                panel.style.fontFamily = `"${appState.textPanel.fontFamily}", sans-serif`;
+                panel.style.fontSize = `${appState.textPanel.fontSize}px`;
+                panel.style.color = appState.textPanel.textColor;
+                panel.style.backgroundColor = appState.textPanel.bgColor;
+                panel.style.border = `2px solid ${appState.textPanel.borderColor}`;
+                panel.style.left = `${appState.textPanel.x}%`;
+                panel.style.top = `${appState.textPanel.y}%`;
+                
+                panel.style.width = appState.textPanel.width === 'auto' || appState.textPanel.width === '' ? 'max-content' : appState.textPanel.width;
+                panel.style.height = appState.textPanel.height;
+                panel.style.textAlign = appState.textPanel.textAlign;
+                
+                if (prefix === 'editor') {
+                    panel.style.display = appState.textPanel.showInEditor ? 'block' : 'none';
+                }
+
+                const sentences = appState.slides[currentSlideIndex].sentences;
+                if (sentences && sentences.length > 0) {
+                    panel.innerHTML = sentences.map((s, i) => `<div class="text-panel-sentence" id="${prefix}-sentence-${i}" style="line-height: ${appState.textPanel.lineHeight};">${s}</div>`).join('');
+                } else {
+                    panel.innerHTML = `<div style="opacity: 0.5; font-style: italic;">Добавьте предложения в контенте...</div>`;
+                }
+            });
+        }
+
+        function toggleTextPanel(prefix = 'editor') {
+            if (prefix === 'editor') {
+                appState.textPanel.showInEditor = !appState.textPanel.showInEditor;
+                const cb = document.getElementById('tp-show-editor');
+                if(cb) cb.checked = appState.textPanel.showInEditor;
+                renderTextPanel();
+            } else {
+                const panel = document.getElementById(`${prefix}-text-panel`);
+                if (panel) panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+            }
+        }
+
+        function resetTextPanelPosition() {
+            appState.textPanel.x = 50; appState.textPanel.y = 50;
+            renderTextPanel(); showToast("Окно текста в центре");
+        }
+
+        function highlightSentence(index, prefix) {
+            const panel = document.getElementById(`${prefix}-text-panel`);
+            if (!panel) return;
+            panel.querySelectorAll('.text-panel-sentence').forEach(el => {
+                el.classList.remove('highlight');
+                el.style.color = appState.textPanel.textColor;
+                el.style.textShadow = 'none';
+                el.style.transform = 'scale(1)';
+                el.style.fontWeight = 'normal';
+            });
+            const target = document.getElementById(`${prefix}-sentence-${index}`);
+            if (target) {
+                target.classList.add('highlight');
+                target.style.color = appState.textPanel.highlightColor;
+                target.style.textShadow = `0 0 10px ${appState.textPanel.highlightColor}`;
+                target.style.transform = 'scale(1.02)';
+                target.style.fontWeight = 'bold';
+            }
+        }
 
         // ================= РАЗМЕР ПОСТЕРА =================
         function updatePosterSize() {
@@ -742,6 +920,7 @@
                 document.getElementById('preview-canvas-wrap').style.display = 'none';
             }
             renderAllHotspots();
+            renderTextPanel();
         }
 
         function renderSlideTabs() {
@@ -928,10 +1107,14 @@
             loadGoogleFont(settings.fontFamily); renderButtons();
         }
         
-        function resetButtonPositions() { ['word','spelling','example'].forEach((t, i) => { appState.buttonStyles[t].positionType='top-center'; appState.buttonStyles[t].x = 30 + (i*20); appState.buttonStyles[t].y = 5; }); loadButtonSettingsToForm(); renderButtons(); showToast("Сброшено"); }
+        function resetButtonPositions() { 
+            ['word','spelling','example'].forEach((t, i) => { appState.buttonStyles[t].positionType='top-center'; appState.buttonStyles[t].x = 30 + (i*20); appState.buttonStyles[t].y = 5; }); 
+            appState.buttonStyles['textBtn'].positionType='top-center'; appState.buttonStyles['textBtn'].x = 90; appState.buttonStyles['textBtn'].y = 5;
+            loadButtonSettingsToForm(); renderButtons(); showToast("Позиции кнопок сброшены"); 
+        }
         
         function renderButtons() {
-            ['word', 'spelling', 'example'].forEach(type => { 
+            ['word', 'spelling', 'example', 'textBtn'].forEach(type => { 
                 const s = appState.buttonStyles[type]; 
                 ['editor-btn-', 'preview-btn-'].forEach(prefix => { 
                     const btn = document.getElementById(prefix + type); if(!btn) return; 
@@ -945,15 +1128,25 @@
             });
         }
         
-        function handleBtnEditorClick(mode, e) { if (appState.buttonStyles.dragEnabled) { e.preventDefault(); } else { document.getElementById('btn-selector').value = mode; loadButtonSettingsToForm(); switchSidebarTab('tab-buttons'); showToast(`Режим: ${mode}`); } }
-        function setSpeechMode(mode) { appState.previewSpeechMode = mode; ['word', 'spelling', 'example'].forEach(t => { const el = document.getElementById('preview-btn-' + t); if(el) el.classList.remove('active-mode'); }); const activeBtn = document.getElementById('preview-btn-' + mode); if(activeBtn) activeBtn.classList.add('active-mode'); }
+        function handleBtnEditorClick(mode, e) { 
+            if (appState.buttonStyles.dragEnabled) { e.preventDefault(); } 
+            else { 
+                if (mode === 'textBtn') { toggleTextPanel('editor'); return; }
+                document.getElementById('btn-selector').value = mode; loadButtonSettingsToForm(); switchSidebarTab('tab-buttons'); showToast(`Режим: ${mode}`); 
+            } 
+        }
+        function setSpeechMode(mode) { 
+            appState.previewSpeechMode = mode; 
+            ['word', 'spelling', 'example'].forEach(t => { const el = document.getElementById('preview-btn-' + t); if(el) el.classList.remove('active-mode'); }); 
+            const activeBtn = document.getElementById('preview-btn-' + mode); if(activeBtn) activeBtn.classList.add('active-mode'); 
+        }
 
         // ================= МАРКЕРЫ =================
         function updateWordsList() { appState.slides[currentSlideIndex].words = document.getElementById('words-input').value.split('\n').map(w => w.trim()).filter(w => w.length > 0); renderAllHotspots(); }
-        function updateSentencesList() { appState.slides[currentSlideIndex].sentences = document.getElementById('sentences-input').value.split('\n').map(s => s.trim()).filter(s => s.length > 0); }
+        function updateSentencesList() { appState.slides[currentSlideIndex].sentences = document.getElementById('sentences-input').value.split('\n').map(s => s.trim()).filter(s => s.length > 0); renderTextPanel(); }
         
         function handleCanvasClick(event) {
-            if (draggedElement || event.target.closest('.hotspot') || event.target.closest('.reflection-panel') || event.target.closest('.mode-btn') || event.target.closest('.custom-logo-overlay')) return;
+            if (draggedElement || event.target.closest('.hotspot') || event.target.closest('.reflection-panel') || event.target.closest('.mode-btn') || event.target.closest('.custom-logo-overlay') || event.target.closest('.text-panel-container')) return;
             if (!appState.slides[currentSlideIndex].posterBase64) return;
             const editorCanvas = document.getElementById('editor-canvas');
             const rect = editorCanvas.getBoundingClientRect();
@@ -974,7 +1167,11 @@
                 document.getElementById('editor-canvas').appendChild(editorHs);
                 
                 const previewHs = document.createElement('div'); previewHs.className = 'hotspot'; previewHs.style.left = `${hs.x}%`; previewHs.style.top = `${hs.y}%`; previewHs.innerHTML = `<span class="hotspot-label">${wordText}</span>`;
-                previewHs.onclick = () => { const word = slide.words[hs.wordIndex]; const sentence = slide.sentences[hs.wordIndex]; if (appState.previewSpeechMode === 'word') speakText(word); else if (appState.previewSpeechMode === 'spelling') speakText(word, true); else if (appState.previewSpeechMode === 'example') speakText(sentence || word); };
+                previewHs.onclick = () => { 
+                    const word = slide.words[hs.wordIndex]; const sentence = slide.sentences[hs.wordIndex]; 
+                    if (appState.previewSpeechMode === 'word') speakText(word); else if (appState.previewSpeechMode === 'spelling') speakText(word, true); else if (appState.previewSpeechMode === 'example') speakText(sentence || word); 
+                    highlightSentence(hs.wordIndex, 'preview');
+                };
                 document.getElementById('preview-canvas').appendChild(previewHs);
             });
         }
@@ -1002,29 +1199,71 @@
             });
         }
 
-        // ================= DRAG & DROP =================
+        // ================= DRAG & DROP И ИСПРАВЛЕНИЕ ЗА КРАЯМИ =================
         function initDragAndDrop() {
             const editorWrap = document.getElementById('editor-canvas-wrap'); const editorCanvas = document.getElementById('editor-canvas');
             editorWrap.addEventListener('mousedown', (e) => {
-                const hsEl = e.target.closest('.hotspot'); const refEl = e.target.closest('.reflection-panel'); const btnEl = e.target.closest('.mode-btn'); const logoEl = e.target.closest('.custom-logo-overlay');
+                const hsEl = e.target.closest('.hotspot'); const refEl = e.target.closest('.reflection-panel'); const btnEl = e.target.closest('.mode-btn'); const logoEl = e.target.closest('.custom-logo-overlay'); const textPanelEl = e.target.closest('.text-panel-container');
                 if (hsEl && !e.target.classList.contains('hotspot-delete')) { draggedElement = hsEl; dragType = 'hotspot'; draggedId = hsEl.dataset.id; e.preventDefault(); }
-                else if (refEl) { draggedElement = refEl; dragType = 'reflection'; e.preventDefault(); } else if (logoEl) { draggedElement = logoEl; dragType = 'logo'; e.preventDefault(); } else if (btnEl && appState.buttonStyles.dragEnabled) { draggedElement = btnEl; dragType = 'button'; draggedId = btnEl.dataset.btnType; e.preventDefault(); btnEl.classList.add('dragging'); }
+                else if (refEl) { draggedElement = refEl; dragType = 'reflection'; e.preventDefault(); } 
+                else if (logoEl) { draggedElement = logoEl; dragType = 'logo'; e.preventDefault(); } 
+                else if (textPanelEl) { draggedElement = textPanelEl; dragType = 'textPanel'; e.preventDefault(); }
+                else if (btnEl && appState.buttonStyles.dragEnabled) { draggedElement = btnEl; dragType = 'button'; draggedId = btnEl.dataset.btnType; e.preventDefault(); btnEl.classList.add('dragging'); }
             });
             window.addEventListener('mousemove', (e) => {
                 if (!draggedElement) return;
                 const rect = editorCanvas.getBoundingClientRect();
                 
-                // Сняты жесткие ограничения Math.max, чтобы элементы можно было выносить на подложку
                 let xPercent = ((e.clientX - rect.left) / rect.width) * 100;
                 let yPercent = ((e.clientY - rect.top) / rect.height) * 100;
                 
-                draggedElement.style.left = `${xPercent}%`; draggedElement.style.top = `${yPercent}%`;
-                if (dragType === 'hotspot') { const hs = appState.slides[currentSlideIndex].hotspots.find(h => h.id === draggedId); if (hs) { hs.x = xPercent; hs.y = yPercent; } }
+                // ИСПРАВЛЕНИЕ: Ограничение перетаскивания (clamping) для окна с текстом по всему игровому полю (background container)
+                if (dragType === 'textPanel') {
+                    const fieldContainer = document.getElementById('editor-canvas-wrap');
+                    const fieldRect = fieldContainer.getBoundingClientRect();
+                    const elRect = draggedElement.getBoundingClientRect();
+                    
+                    // Переводим границы поля в координаты относительно левого верхнего угла постера (rect)
+                    // Добавляем 10px отступа (margin), чтобы окно не "прилипало" слишком сильно
+                    let minXPx = (fieldRect.left - rect.left) + (elRect.width / 2) + 10;
+                    let maxXPx = (fieldRect.right - rect.left) - (elRect.width / 2) - 10;
+                    
+                    // Если окно больше самого поля, центрируем его
+                    if (minXPx > maxXPx) { 
+                        let centerPx = (fieldRect.left - rect.left) + (fieldRect.width / 2); 
+                        minXPx = centerPx; maxXPx = centerPx; 
+                    }
+                    
+                    let minYPx = (fieldRect.top - rect.top) + (elRect.height / 2) + 10;
+                    let maxYPx = (fieldRect.bottom - rect.top) - (elRect.height / 2) - 10;
+                    if (minYPx > maxYPx) { 
+                        let centerPx = (fieldRect.top - rect.top) + (fieldRect.height / 2); 
+                        minYPx = centerPx; maxYPx = centerPx; 
+                    }
+                    
+                    let xPx = e.clientX - rect.left;
+                    let yPx = e.clientY - rect.top;
+                    
+                    // Жесткая фиксация: координаты мыши не могут выйти за рамки
+                    xPx = Math.max(minXPx, Math.min(maxXPx, xPx));
+                    yPx = Math.max(minYPx, Math.min(maxYPx, yPx));
+                    
+                    xPercent = (xPx / rect.width) * 100;
+                    yPercent = (yPx / rect.height) * 100;
+                    
+                    appState.textPanel.x = xPercent;
+                    appState.textPanel.y = yPercent;
+                }
+                // Для остальных элементов логика старая
+                else if (dragType === 'hotspot') { const hs = appState.slides[currentSlideIndex].hotspots.find(h => h.id === draggedId); if (hs) { hs.x = xPercent; hs.y = yPercent; } }
                 else if (dragType === 'reflection') { appState.reflection.x = xPercent; appState.reflection.y = yPercent; document.getElementById('ref-pos').value = 'free'; }
                 else if (dragType === 'logo') { appState.logo.x = xPercent; appState.logo.y = yPercent; document.getElementById('logo-pos-type').value = 'free'; }
                 else if (dragType === 'button') { const btnSet = appState.buttonStyles[draggedId]; btnSet.x = xPercent; btnSet.y = yPercent; btnSet.positionType = 'free'; if(document.getElementById('btn-selector').value === draggedId) loadButtonSettingsToForm(); }
+                
+                draggedElement.style.left = `${xPercent}%`;
+                draggedElement.style.top = `${yPercent}%`;
             });
-            window.addEventListener('mouseup', () => { if (draggedElement) { if (dragType === 'hotspot') renderAllHotspots(); if (dragType === 'button') { draggedElement.classList.remove('dragging'); renderButtons(); } if (dragType === 'reflection') renderReflectionPanel(); if (dragType === 'logo') renderLogo(); draggedElement = null; dragType = null; } });
+            window.addEventListener('mouseup', () => { if (draggedElement) { if (dragType === 'hotspot') renderAllHotspots(); if (dragType === 'button') { draggedElement.classList.remove('dragging'); renderButtons(); } if (dragType === 'reflection') renderReflectionPanel(); if (dragType === 'logo') renderLogo(); if(dragType === 'textPanel') renderTextPanel(); draggedElement = null; dragType = null; } });
         }
 
         // ================= JSON =================
@@ -1037,6 +1276,8 @@
                     if (parsed.posterBase64 !== undefined) { parsed.slides = [{ posterBase64: parsed.posterBase64, words: parsed.words || [], sentences: parsed.sentences || [], hotspots: parsed.hotspots || [] }]; delete parsed.posterBase64; delete parsed.words; delete parsed.sentences; delete parsed.hotspots; }
                     if (!parsed.orientation) parsed.orientation = 'auto'; if (!parsed.posterSize) parsed.posterSize = 100;
                     if (!parsed.backdrop) parsed.backdrop = { enabled: false, color: '#0d0d15', opacity: 80, padding: 40, radius: 12 };
+                    if (!parsed.buttonStyles.textBtn) parsed.buttonStyles.textBtn = { ...defaultButtonStyles, text: '📖 Текст', x: 90, y: 5 };
+                    if (!parsed.textPanel) parsed.textPanel = { fontFamily: 'Segoe UI', fontSize: 16, textColor: '#f0f4f8', highlightColor: '#ffe600', bgColor: 'rgba(13, 13, 21, 0.9)', borderColor: '#00f3ff', x: 50, y: 50, showInEditor: true, width: 'auto', height: 'auto', textAlign: 'left', lineHeight: 1.4 };
                     
                     Object.assign(appState, parsed);
                     
@@ -1054,14 +1295,26 @@
                     document.getElementById('ref-color').value = appState.reflection.color; document.getElementById('ref-scale').value = appState.reflection.scale; if(appState.reflection.rewardImageSize) document.getElementById('reward-size').value = appState.reflection.rewardImageSize; if(appState.reflection.emojis) document.getElementById('ref-emojis').value = appState.reflection.emojis.join(' ');
                     if (appState.logo) { document.getElementById('logo-enabled').checked = appState.logo.enabled; document.getElementById('logo-type').value = appState.logo.type; document.getElementById('logo-text').value = appState.logo.text || ''; document.getElementById('logo-font').value = appState.logo.font || 'Arial'; document.getElementById('logo-color').value = appState.logo.color || '#00f3ff'; document.getElementById('logo-size').value = appState.logo.size || 24; document.getElementById('logo-url').value = appState.logo.url || ''; }
                     
-                    switchSlide(0); applyPosterSize(); updateVoiceList(); updateVisualSettings(); updateBackdropSettings(); updateReflectionSettings(); updateLogoSettings(); updateBackgroundDisplay(); loadButtonSettingsToForm(); renderButtons(); showToast("Проект успешно загружен!");
+                    document.getElementById('tp-show-editor').checked = appState.textPanel.showInEditor;
+                    document.getElementById('tp-width').value = appState.textPanel.width.replace('px', '');
+                    document.getElementById('tp-height').value = appState.textPanel.height.replace('px', '');
+                    document.getElementById('tp-align').value = appState.textPanel.textAlign;
+                    document.getElementById('tp-line-height').value = appState.textPanel.lineHeight;
+                    document.getElementById('tp-font').value = appState.textPanel.fontFamily;
+                    document.getElementById('tp-font-size').value = appState.textPanel.fontSize;
+                    document.getElementById('tp-text-color').value = appState.textPanel.textColor;
+                    document.getElementById('tp-high-color').value = appState.textPanel.highlightColor;
+                    document.getElementById('tp-bg-color').value = appState.textPanel.bgColor;
+                    document.getElementById('tp-border-color').value = appState.textPanel.borderColor;
+
+                    switchSlide(0); applyPosterSize(); updateVoiceList(); updateVisualSettings(); updateBackdropSettings(); updateReflectionSettings(); updateLogoSettings(); updateBackgroundDisplay(); loadButtonSettingsToForm(); renderButtons(); renderTextPanel(); showToast("Проект успешно загружен!");
                 } catch (err) { showToast("Ошибка чтения JSON файла!", true); }
             }; reader.readAsText(file);
         }
 
         // ================= ГЕНЕРАЦИЯ HTML ДЛЯ ЭКСПОРТА =================
         function generateCoreHTML() {
-            let fontLinks = ''; new Set(['word', 'spelling', 'example'].map(t => appState.buttonStyles[t].fontFamily).concat([appState.logo.font])).forEach(f => { if(!['Arial', 'Comic Sans MS', 'Segoe UI', 'Helvetica', 'sans-serif'].includes(f)) fontLinks += `<link href="https://fonts.googleapis.com/css2?family=${f.replace(/\s+/g, '+')}&display=swap" rel="stylesheet">\n    `; });
+            let fontLinks = ''; new Set(['word', 'spelling', 'example', 'textBtn'].map(t => appState.buttonStyles[t].fontFamily).concat([appState.logo.font, appState.textPanel.fontFamily])).forEach(f => { if(!['Arial', 'Comic Sans MS', 'Segoe UI', 'Helvetica', 'sans-serif'].includes(f)) fontLinks += `<link href="https://fonts.googleapis.com/css2?family=${f.replace(/\s+/g, '+')}&display=swap" rel="stylesheet">\n    `; });
             
             const scale = appState.posterSize / 100;
             
@@ -1095,9 +1348,10 @@
         .canvas-container-inner img { 
             display: block; 
             position: relative; z-index: 1;
-            max-width: ${appState.posterSize}%; 
+            width: auto;
+            height: auto;
+            max-width: calc(100vw * ${scale}); 
             max-height: calc((100vh - ${appState.background.enabled ? appState.background.padding*2 : 0}px) * ${scale}); 
-            object-fit: contain; 
             pointer-events: none; 
         }
         
@@ -1125,6 +1379,10 @@
         .custom-logo-overlay a { text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
         .custom-logo-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
         .custom-logo-overlay:hover { filter: drop-shadow(0 0 10px var(--neon-cyan)); transform: translate(-50%, -50%) scale(1.05); }
+        
+        .text-panel-container { position: absolute; z-index: 30; padding: 15px 20px; border: 2px solid ${appState.textPanel.borderColor}; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.8); transform: translate(-50%, -50%); background: ${appState.textPanel.bgColor}; left: ${appState.textPanel.x}%; top: ${appState.textPanel.y}%; font-family: '${appState.textPanel.fontFamily}', sans-serif; font-size: ${appState.textPanel.fontSize}px; color: ${appState.textPanel.textColor}; width: ${appState.textPanel.width === 'auto' || appState.textPanel.width === '' ? 'max-content' : appState.textPanel.width}; height: ${appState.textPanel.height}; text-align: ${appState.textPanel.textAlign}; overflow-y: auto; box-sizing: border-box; max-width: 100%; max-height: 100%; }
+        .text-panel-sentence { margin-bottom: 8px; transition: all 0.3s ease; line-height: ${appState.textPanel.lineHeight}; }
+        .text-panel-sentence:last-child { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -1132,7 +1390,7 @@
         <div class="slide-nav prev-slide" id="nav-prev" onclick="changeSlide(-1)" style="display:none;">&#10094;</div>
         <div class="slide-nav next-slide" id="nav-next" onclick="changeSlide(1)" style="display:none;">&#10095;</div>
         
-        <div class="canvas-container">
+        <div class="canvas-container" id="canvas-wrap">
             <!-- Обертка для отступов в готовом файле -->
             <div class="canvas-container-padded" id="canvas-padded">
                 <div class="poster-backdrop" id="backdrop"></div>
@@ -1143,9 +1401,12 @@
                     <div class="mode-btn active-mode" id="btn-word" onclick="setMode('word')"></div>
                     <div class="mode-btn" id="btn-spelling" onclick="setMode('spelling')"></div>
                     <div class="mode-btn" id="btn-example" onclick="setMode('example')"></div>
+                    <div class="mode-btn" id="btn-textBtn" onclick="toggleTextPanel()"></div>
                     <div class="custom-logo-overlay" id="logo-overlay" style="display: none;"></div>
                 </div>
             </div>
+            <!-- Окно текста прикреплено ко всему фону -->
+            <div class="text-panel-container" id="text-panel"></div>
         </div>
     </div>
     <script>
@@ -1184,7 +1445,13 @@
                 const word = slide.words[hs.wordIndex] || 'Word #' + (hs.wordIndex + 1); const sentence = slide.sentences[hs.wordIndex];
                 const div = document.createElement('div'); div.className = 'hotspot'; div.style.left = hs.x + '%'; div.style.top = hs.y + '%';
                 div.innerHTML = '<span class="hotspot-label">' + word + '</span>';
-                div.onclick = () => { if (activeMode === 'word') speak(word); else if (activeMode === 'spelling') speak(word, true); else if (activeMode === 'example') speak(sentence || word); };
+                div.onclick = () => { 
+                    if (activeMode === 'word') speak(word); 
+                    else if (activeMode === 'spelling') speak(word, true); 
+                    else if (activeMode === 'example') speak(sentence || word); 
+                    
+                    highlightSentence(hs.wordIndex, '');
+                };
                 canvas.appendChild(div);
             });
             // Сохраняем UI поверх маркеров
@@ -1192,7 +1459,42 @@
             canvas.appendChild(document.getElementById('btn-word'));
             canvas.appendChild(document.getElementById('btn-spelling'));
             canvas.appendChild(document.getElementById('btn-example'));
+            canvas.appendChild(document.getElementById('btn-textBtn'));
             canvas.appendChild(document.getElementById('logo-overlay'));
+            
+            const tp = document.getElementById('text-panel');
+            if (tp) {
+                if (slide.sentences && slide.sentences.length > 0) {
+                    tp.innerHTML = slide.sentences.map((s, i) => '<div class="text-panel-sentence" id="sentence-'+i+'" style="line-height: ' + state.textPanel.lineHeight + ';">' + s + '</div>').join('');
+                } else {
+                    tp.innerHTML = '';
+                }
+            }
+        }
+        
+        function toggleTextPanel() {
+            const p = document.getElementById('text-panel');
+            if (p) p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        }
+        
+        function highlightSentence(index) {
+            const panel = document.getElementById('text-panel');
+            if (!panel) return;
+            panel.querySelectorAll('.text-panel-sentence').forEach(el => {
+                el.style.color = state.textPanel.textColor;
+                el.style.textShadow = 'none';
+                el.style.transform = 'scale(1)';
+                el.style.fontWeight = 'normal';
+                el.classList.remove('highlight');
+            });
+            const target = document.getElementById('sentence-'+index);
+            if (target) {
+                target.style.color = state.textPanel.highlightColor;
+                target.style.textShadow = '0 0 10px ' + state.textPanel.highlightColor;
+                target.style.transform = 'scale(1.02)';
+                target.style.fontWeight = 'bold';
+                target.classList.add('highlight');
+            }
         }
         
         function renderReflection() {
@@ -1209,7 +1511,7 @@
             }
         }
         function renderButtons() {
-            ['word', 'spelling', 'example'].forEach(type => {
+            ['word', 'spelling', 'example', 'textBtn'].forEach(type => {
                 const btn = document.getElementById('btn-'+type); const s = state.buttonStyles[type];
                 if (!btn) return;
                 if (s.show === false) {
